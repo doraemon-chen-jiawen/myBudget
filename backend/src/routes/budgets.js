@@ -8,6 +8,7 @@ const router = express.Router();
  * Budget management (CRUD)
  */
 router.get("/", asyncHandler(budgetsController.list));
+router.post("/initialize-defaults", asyncHandler(budgetsController.initializeDefaults));
 router.post("/", asyncHandler(budgetsController.create));
 router.put("/:id", asyncHandler(budgetsController.update));
 router.delete("/:id", asyncHandler(budgetsController.remove));

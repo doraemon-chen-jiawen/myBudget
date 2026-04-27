@@ -10,8 +10,10 @@ function formatDate(date = new Date()) {
 Page({
   data: {
     today: "",
+    year: "",
     month: "",
     day: "",
+    weekday: "",
     budgetTotal: 0,
     actualTotal: 0,
     remainTotal: 0,
@@ -21,10 +23,13 @@ Page({
   onLoad() {
     const date = formatDate();
     const now = new Date();
+    const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
     this.setData({
       today: date,
+      year: now.getFullYear(),
       month: `${now.getMonth() + 1}`.padStart(2, "0"),
-      day: `${now.getDate()}`.padStart(2, "0")
+      day: `${now.getDate()}`.padStart(2, "0"),
+      weekday: weekdays[now.getDay()]
     });
   },
 

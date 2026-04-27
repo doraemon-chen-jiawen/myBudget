@@ -1,7 +1,7 @@
 @import "../../app.wxss";
 
 page {
-  background: var(--color-bg);
+  background: #eef8f2;
 }
 
 .page {
@@ -18,7 +18,7 @@ page {
   right: -20%;
   width: 70%;
   height: 70%;
-  background: radial-gradient(ellipse at center, rgba(111, 207, 151, 0.15) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(111, 207, 151, 0.25) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -29,40 +29,49 @@ page {
   left: -15%;
   width: 50%;
   height: 50%;
-  background: radial-gradient(ellipse at center, rgba(86, 204, 242, 0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(111, 207, 151, 0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 
 .date-hero {
   position: relative;
-  padding: 60rpx 40rpx 30rpx;
+  padding: 56rpx 40rpx 28rpx;
   margin-bottom: 32rpx;
 }
 
-.date-label {
+.date-day {
   display: block;
-  font-size: 22rpx;
-  letter-spacing: 6rpx;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: 12rpx;
-  font-weight: 600;
-}
-
-.date-main {
-  font-size: 100rpx;
+  font-size: 120rpx;
   font-weight: 800;
-  color: var(--color-text-main);
+  color: #2D5A3F;
   line-height: 1;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -3rpx;
+  letter-spacing: -4rpx;
 }
 
-.date-main text {
-  font-size: 52rpx;
-  color: var(--color-primary);
-  font-weight: 700;
-  letter-spacing: -2rpx;
+.date-meta {
+  display: flex;
+  align-items: baseline;
+  margin-top: 8rpx;
+  gap: 4rpx;
+}
+
+.date-month {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #5AB87A;
+}
+
+.date-dot {
+  font-size: 28rpx;
+  color: #8CBFA4;
+  margin: 0 6rpx;
+}
+
+.date-weekday {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #7AAE93;
+  letter-spacing: 2rpx;
 }
 
 .decor-circle {
@@ -91,9 +100,10 @@ page {
   position: relative;
   margin: 0 28rpx 36rpx;
   padding: 44rpx 36rpx;
-  background: var(--color-card);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: 0 4rpx 24rpx rgba(111, 207, 151, 0.1);
+  border: 1rpx solid rgba(111, 207, 151, 0.12);
 }
 
 .summary-card::before {
@@ -161,7 +171,7 @@ page {
 .stat-item {
   flex: 1;
   padding: 22rpx;
-  background: linear-gradient(135deg, rgba(111, 207, 151, 0.06), rgba(86, 204, 242, 0.04));
+  background: linear-gradient(135deg, rgba(111, 207, 151, 0.1), rgba(86, 204, 242, 0.06));
   border-radius: var(--radius-smooth);
 }
 
@@ -216,15 +226,17 @@ page {
 .quick-item {
   position: relative;
   padding: 26rpx 22rpx;
-  background: var(--color-card);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-smooth);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 2rpx 12rpx rgba(111, 207, 151, 0.08);
+  border: 1rpx solid rgba(111, 207, 151, 0.08);
   transition: all 0.3s ease;
 }
 
 .quick-item:active {
   transform: scale(0.98);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: 0 4rpx 20rpx rgba(111, 207, 151, 0.15);
+  border-color: rgba(111, 207, 151, 0.2);
 }
 
 .quick-btn {

@@ -1,38 +1,54 @@
 <view class="login-page">
-  <view class="login-card card">
-    <view class="logo-section">
-      <text class="app-name">懒人预算</text>
-      <text class="app-slogan">轻松管理你的日常开销</text>
-    </view>
+  <!-- Background decorations -->
+  <view class="bg-deco bg-deco-1"></view>
+  <view class="bg-deco bg-deco-2"></view>
+  <view class="bg-deco bg-deco-3"></view>
 
-    <view class="form-section">
-      <view class="form-item">
-        <text class="form-label">用户名</text>
+  <!-- Branding -->
+  <view class="brand-area">
+    <view class="brand-icon">
+      <text class="brand-emoji">🌿</text>
+    </view>
+    <text class="brand-name">懒人预算</text>
+    <text class="brand-slogan">轻松管理你的日常开销</text>
+  </view>
+
+  <!-- Form Card -->
+  <view class="form-card">
+    <text class="form-title">欢迎回来</text>
+
+    <view class="input-group">
+      <view class="input-wrap">
+        <text class="input-icon">👤</text>
         <input
-          class="form-input"
+          class="input-field"
           type="text"
           placeholder="请输入用户名"
+          placeholder-style="color: #b8c4ce"
           value="{{username}}"
           bindinput="onUsernameInput"
         />
       </view>
+    </view>
 
-      <view class="form-item">
-        <text class="form-label">密码</text>
+    <view class="input-group">
+      <view class="input-wrap">
+        <text class="input-icon">🔒</text>
         <input
-          class="form-input"
+          class="input-field"
           type="password"
           placeholder="请输入密码"
+          placeholder-style="color: #b8c4ce"
           value="{{password}}"
           bindinput="onPasswordInput"
         />
       </view>
+    </view>
 
-      <button class="login-btn" bindtap="onLogin">登录</button>
+    <button class="submit-btn" hover-class="submit-btn-active" bindtap="onLogin">登录</button>
 
-      <view class="register-link">
-        <text class="link-text" bindtap="onGoToRegister">没有账号？去注册</text>
-      </view>
+    <view class="switch-link">
+      <text class="switch-text" bindtap="onGoToRegister">还没有账号？<text class="switch-highlight">立即注册</text></text>
     </view>
   </view>
 </view>

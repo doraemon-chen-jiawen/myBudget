@@ -6,8 +6,12 @@
   <view class="date-hero">
     <view class="decor-circle decor-circle-1"></view>
     <view class="decor-circle decor-circle-2"></view>
-    <text class="date-label">Today</text>
-    <text class="date-main">{{day}}<text>.{{month}}</text></text>
+    <text class="date-day">{{day}}</text>
+    <view class="date-meta">
+      <text class="date-month">{{month}}月</text>
+      <text class="date-dot">·</text>
+      <text class="date-weekday">{{weekday}}</text>
+    </view>
   </view>
 
   <view class="summary-card">

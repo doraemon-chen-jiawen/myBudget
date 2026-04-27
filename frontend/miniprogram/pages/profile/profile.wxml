@@ -1,51 +1,132 @@
 <view class="profile-page">
+  <!-- Header -->
   <view class="header-section">
+    <view class="deco-circle deco-1"></view>
+    <view class="deco-circle deco-2"></view>
+    <view class="deco-circle deco-3"></view>
+
     <view class="user-info">
-      <view class="avatar">
-        <text class="avatar-text">{{userInfo.nickname.charAt(0)}}</text>
+      <view class="avatar-wrapper">
+        <view class="avatar-ring"></view>
+        <view class="avatar">
+          <text class="avatar-text">{{userInfo.nickname.charAt(0)}}</text>
+        </view>
       </view>
       <view class="user-detail">
+        <text class="greeting">{{greeting}}</text>
         <text class="nickname">{{userInfo.nickname}}</text>
-        <text class="user-id">ID: {{userId || '未登录'}}</text>
+        <view class="user-id-badge">
+          <text class="user-id-text">ID: {{userId || '未登录'}}</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <view class="menu-section">
-    <view class="menu-item" bindtap="onNavigateToBudget">
-      <view class="menu-item-left">
-        <text class="menu-icon">💰</text>
-        <text class="menu-text">预算设置</text>
-      </view>
-      <text class="menu-arrow">›</text>
-    </view>
+  <!-- Wave divider -->
+  <view class="header-wave"></view>
 
-    <view class="menu-item" bindtap="onNavigateToSettings">
-      <view class="menu-item-left">
-        <text class="menu-icon">📊</text>
-        <text class="menu-text">统计分析</text>
-      </view>
-      <text class="menu-arrow">›</text>
+  <!-- Quick stats -->
+  <view class="stats-card">
+    <view class="stat-item">
+      <text class="stat-value">{{stats.days}}</text>
+      <text class="stat-label">记账天数</text>
     </view>
-
-    <view class="menu-item" bindtap="onNavigateToSettings">
-      <view class="menu-item-left">
-        <text class="menu-icon">🏷️</text>
-        <text class="menu-text">分类管理</text>
-      </view>
-      <text class="menu-arrow">›</text>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.count}}</text>
+      <text class="stat-label">记账笔数</text>
     </view>
-
-    <view class="menu-item" bindtap="onNavigateToSettings">
-      <view class="menu-item-left">
-        <text class="menu-icon">⚙️</text>
-        <text class="menu-text">设置</text>
-      </view>
-      <text class="menu-arrow">›</text>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.saved}}</text>
+      <text class="stat-label">本月结余</text>
     </view>
   </view>
 
+  <!-- Menu: Features -->
+  <view class="menu-group">
+    <text class="group-title">常用功能</text>
+    <view class="menu-card">
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToBudget">
+        <view class="menu-left">
+          <view class="icon-box icon-budget">
+            <text class="icon-emoji">💰</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">预算设置</text>
+            <text class="menu-subtitle">设置每月预算目标</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
+        <view class="menu-left">
+          <view class="icon-box icon-stats">
+            <text class="icon-emoji">📊</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">统计分析</text>
+            <text class="menu-subtitle">查看收支趋势</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
+        <view class="menu-left">
+          <view class="icon-box icon-category">
+            <text class="icon-emoji">🏷️</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">分类管理</text>
+            <text class="menu-subtitle">自定义收支分类</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Menu: Other -->
+  <view class="menu-group">
+    <text class="group-title">更多</text>
+    <view class="menu-card">
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
+        <view class="menu-left">
+          <view class="icon-box icon-settings">
+            <text class="icon-emoji">⚙️</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">设置</text>
+            <text class="menu-subtitle">账户与偏好设置</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
+        <view class="menu-left">
+          <view class="icon-box icon-help">
+            <text class="icon-emoji">💬</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">帮助与反馈</text>
+            <text class="menu-subtitle">常见问题与意见反馈</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Logout -->
   <view class="logout-section">
-    <button class="logout-btn" bindtap="onLogout">退出登录</button>
+    <button class="logout-btn" hover-class="logout-btn-active" bindtap="onLogout">退出登录</button>
+  </view>
+
+  <!-- Footer -->
+  <view class="footer">
+    <text class="footer-text">myBudget v1.0.0</text>
   </view>
 </view>

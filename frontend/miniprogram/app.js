@@ -1,6 +1,6 @@
 App({
   globalData: {
-    apiBaseUrl: "http://localhost:3000"
+    apiBaseUrl: "http://192.168.3.16:3000"
   },
   onLaunch() {
     // Mini program bootstrap.

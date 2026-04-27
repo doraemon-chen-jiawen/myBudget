@@ -7,7 +7,8 @@ function request(options = {}) {
     method = "GET",
     data = {},
     loadingTitle = "加载中",
-    showLoading = true
+    showLoading = true,
+    silent = false
   } = options;
 
   if (!url) {
@@ -33,17 +34,17 @@ function request(options = {}) {
           return;
         }
         const message = res.data?.message || "请求失败";
-        wx.showToast({
-          title: message,
-          icon: "none"
-        });
-        reject(new Error(message));
+        if (!silent) {
+          wx.showToast({ title: message, icon: "none" });
+        }
+        const err = new Error(message);
+        err.data = res.data;
+        reject(err);
       },
       fail: (err) => {
-        wx.showToast({
-          title: "网络异常，请稍后重试",
-          icon: "none"
-        });
+        if (!silent) {
+          wx.showToast({ title: "网络异常，请稍后重试", icon: "none" });
+        }
         reject(err);
       },
       complete: () => {

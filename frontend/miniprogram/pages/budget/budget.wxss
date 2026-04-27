@@ -1,13 +1,14 @@
-/* 有机柔软的触控式卡片设计系统 */
+/* Budget Page — Refined Organic Design */
+
 .budget-page {
   min-height: 100vh;
   background: var(--color-bg);
-  padding-bottom: 160rpx;
+  padding-bottom: 180rpx;
   position: relative;
   overflow: hidden;
 }
 
-/* 背景装饰 */
+/* Background decorative gradients */
 .budget-page::before {
   content: "";
   position: fixed;
@@ -28,54 +29,88 @@
   left: -100rpx;
   width: 400rpx;
   height: 400rpx;
-  background: radial-gradient(circle, rgba(86, 204, 242, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(86, 204, 242, 0.06) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
 }
 
-/* 页面标题区域 */
+/* ===== Page Header ===== */
 .page-header {
-  padding: 40rpx 32rpx 24rpx;
+  padding: 48rpx 36rpx 28rpx;
   position: relative;
   z-index: 1;
+  animation: fade-in 0.4s ease-out both;
 }
 
-.page-title {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: var(--color-text-main);
-  margin-bottom: 8rpx;
-  margin-right: 16rpx;
-  letter-spacing: -0.5rpx;
+.header-deco {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
 }
 
-.page-subtitle {
+.header-total {
+  text-align: center;
+  padding: 16rpx 0 8rpx;
+}
+
+.total-label {
+  display: block;
   font-size: 26rpx;
   color: var(--color-text-secondary);
   font-weight: 400;
+  margin-bottom: 8rpx;
 }
 
-/* 有机形状标签切换器 */
+.total-amount-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.total-currency {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-right: 4rpx;
+}
+
+.total-amount {
+  font-size: 64rpx;
+  font-weight: 800;
+  color: var(--color-text-main);
+  letter-spacing: -1rpx;
+}
+
+.total-breakdown {
+  display: block;
+  font-size: 22rpx;
+  color: var(--color-text-hint, #b8c4ce);
+  margin-top: 6rpx;
+}
+
+/* ===== Tabs ===== */
 .tabs-container {
-  padding: 0 24rpx;
+  padding: 0 28rpx;
   position: relative;
   z-index: 1;
   margin-bottom: 32rpx;
+  animation: fade-up 0.5s ease-out 0.1s both;
 }
 
 .tabs {
   display: flex;
-  background: rgba(255, 255, 255, 0.6);
-  /* backdrop-filter: blur(20rpx); */
+  background: #ffffff;
   padding: 8rpx;
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 4rpx 24rpx rgba(111, 207, 151, 0.08), 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
   position: relative;
   overflow: hidden;
 }
 
-/* 活动指示器 - 滑动效果 */
 .tabs-indicator {
   position: absolute;
   top: 8rpx;
@@ -84,8 +119,9 @@
   height: calc(100% - 16rpx);
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   border-radius: var(--radius-pill);
-  /* transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); */
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 0;
+  box-shadow: 0 4rpx 16rpx rgba(111, 207, 151, 0.3);
 }
 
 .tab {
@@ -97,7 +133,7 @@
   font-weight: 500;
   position: relative;
   z-index: 1;
-  /* transition: color 0.3s ease; */
+  transition: color 0.3s ease;
 }
 
 .tab--active {
@@ -105,9 +141,9 @@
   font-weight: 600;
 }
 
-/* 预算列表 */
+/* ===== Budget List ===== */
 .budget-list {
-  padding: 0 24rpx;
+  padding: 0 28rpx;
   position: relative;
   z-index: 1;
 }
@@ -117,13 +153,15 @@
   border-radius: var(--radius-card);
   padding: 32rpx 28rpx;
   margin-bottom: 20rpx;
-  box-shadow: var(--shadow-elevated);
+  box-shadow: 0 4rpx 20rpx rgba(30, 41, 59, 0.05);
   position: relative;
   overflow: hidden;
-  /* transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); */
   border: 2rpx solid transparent;
+  animation: card-enter 0.45s ease-out both;
+  animation-delay: calc(var(--index, 0) * 0.06s);
 }
 
+/* Left color accent bar */
 .budget-item::before {
   content: "";
   position: absolute;
@@ -133,13 +171,13 @@
   height: 100%;
   background: linear-gradient(180deg, var(--item-color, var(--color-primary)), var(--item-color-light, rgba(111, 207, 151, 0.3)));
   border-radius: var(--radius-card) 0 0 var(--radius-card);
-  opacity: 0.6;
-  /* transition: opacity 0.3s ease; */
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
 }
 
 .budget-item:active {
-  transform: scale(0.98);
-  box-shadow: 0 8rpx 24rpx rgba(30, 41, 59, 0.06);
+  transform: scale(0.985);
+  box-shadow: 0 2rpx 12rpx rgba(30, 41, 59, 0.04);
 }
 
 .budget-item:focus-within {
@@ -156,17 +194,18 @@
   margin-bottom: 20rpx;
 }
 
-/* 操作按钮组 */
+/* Action buttons */
 .budget-actions {
   display: flex;
   gap: 8rpx;
   align-items: center;
+  margin-left: auto;
 }
 
 .action-btn {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: var(--radius-smooth);
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,21 +213,13 @@
   transition: all 0.2s ease;
 }
 
-/* .action-btn:active {
-  transform: scale(0.9);
-} */
-
 .action-icon {
-  font-size: 28rpx;
+  font-size: 26rpx;
 }
 
 .action-btn--edit:active {
-  background: var(--color-primary);
+  background: rgba(111, 207, 151, 0.15);
 }
-
-/* .action-btn--edit:active .action-icon {
-  filter: brightness(0) invert(1);
-} */
 
 .action-btn--delete:active {
   background: var(--color-danger-light);
@@ -202,27 +233,26 @@
   background: var(--color-danger);
 }
 
-/* .action-btn--delete-custom:active .action-icon {
-  filter: brightness(0) invert(1);
-} */
-
 .budget-icon {
   width: 56rpx;
   height: 56rpx;
   background: var(--item-bg, rgba(111, 207, 151, 0.1));
-  border-radius: var(--radius-smooth);
+  border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32rpx;
   margin-right: 16rpx;
+  flex-shrink: 0;
 }
 
 .budget-label-group {
   flex: 1;
+  min-width: 0;
 }
 
 .budget-label {
+  display: block;
   font-size: 30rpx;
   font-weight: 600;
   color: var(--color-text-main);
@@ -230,11 +260,12 @@
 }
 
 .budget-hint {
+  display: block;
   font-size: 22rpx;
   color: var(--color-text-hint);
 }
 
-/* 预算输入区域 */
+/* Budget input area */
 .budget-input-wrapper {
   position: relative;
   display: flex;
@@ -265,10 +296,10 @@
 
 .budget-input:focus {
   background: #ffffff;
-  box-shadow: 0 0 0 3rpx var(--item-color, rgba(111, 207, 151, 0.2));
+  box-shadow: 0 0 0 4rpx rgba(111, 207, 151, 0.15);
 }
 
-/* 快捷金额按钮 */
+/* Quick amount buttons */
 .quick-amounts {
   display: flex;
   gap: 12rpx;
@@ -289,14 +320,14 @@
   transition: all 0.2s ease;
 }
 
-.quick-amount-btn:active {
-  background: var(--item-bg, rgba(111, 207, 151, 0.15));
-  border-color: var(--item-color, var(--color-primary));
-  color: var(--item-color, var(--color-primary));
+.quick-amount-btn--active {
+  background: var(--item-bg, rgba(111, 207, 151, 0.15)) !important;
+  border-color: var(--item-color, var(--color-primary)) !important;
+  color: var(--item-color, var(--color-primary)) !important;
   transform: scale(0.95);
 }
 
-/* 添加分类按钮 */
+/* Add category button */
 .add-category-btn {
   display: flex;
   align-items: center;
@@ -304,25 +335,27 @@
   gap: 12rpx;
   height: 96rpx;
   margin-top: 24rpx;
-  background: rgba(111, 207, 151, 0.1);
-  border: 2rpx dashed var(--color-primary);
+  background: rgba(111, 207, 151, 0.06);
+  border: 2rpx dashed rgba(111, 207, 151, 0.4);
   border-radius: var(--radius-card);
   color: var(--color-primary);
   font-size: 28rpx;
   font-weight: 600;
-  /* transition: all 0.3s ease; */
+  transition: all 0.25s ease;
 }
 
-.add-category-btn:active {
-  background: rgba(111, 207, 151, 0.2);
+.add-category-btn--active {
+  background: rgba(111, 207, 151, 0.12);
+  border-color: var(--color-primary);
   transform: scale(0.98);
 }
 
 .add-icon {
-  font-size: 32rpx;
+  font-size: 36rpx;
+  font-weight: 300;
 }
 
-/* 底部操作按钮 */
+/* ===== Bottom Action Bar ===== */
 .action-buttons {
   position: fixed;
   bottom: 0;
@@ -330,10 +363,9 @@
   right: 0;
   display: flex;
   gap: 16rpx;
-  padding: 24rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20rpx);
-  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+  padding: 24rpx 28rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1rpx solid rgba(0, 0, 0, 0.04);
   z-index: 100;
 }
 
@@ -346,7 +378,7 @@
   font-size: 32rpx;
   font-weight: 600;
   padding: 0;
-  /* transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); */
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn::after {
@@ -356,26 +388,27 @@
 .btn--primary {
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #ffffff;
-  box-shadow: 0 8rpx 24rpx rgba(111, 207, 151, 0.4);
+  box-shadow: 0 8rpx 28rpx rgba(111, 207, 151, 0.35);
 }
 
-.btn--primary:active {
+.btn--primary-active {
   transform: scale(0.95);
-  box-shadow: 0 4rpx 12rpx rgba(111, 207, 151, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(111, 207, 151, 0.25);
+  opacity: 0.9;
 }
 
 .btn--secondary {
   background: var(--color-bg);
   color: var(--color-text-main);
-  border: 2rpx solid rgba(0, 0, 0, 0.05);
+  border: 2rpx solid rgba(0, 0, 0, 0.04);
 }
 
-.btn--secondary:active {
-  background: #f0f0f0;
+.btn--secondary-active {
+  background: #eef1f0;
   transform: scale(0.95);
 }
 
-/* 模态框 */
+/* ===== Modal ===== */
 .modal {
   position: fixed;
   top: 0;
@@ -402,8 +435,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8rpx);
+  background: rgba(15, 23, 42, 0.45);
 }
 
 .modal-content {
@@ -411,10 +443,10 @@
   width: 600rpx;
   background: #ffffff;
   border-radius: var(--radius-modal);
-  box-shadow: var(--shadow-modal);
+  box-shadow: 0 32rpx 100rpx rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  transform: scale(0.9) translateY(40rpx);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.92) translateY(30rpx);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal--show .modal-content {
@@ -425,14 +457,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 32rpx 32rpx 24rpx;
-  border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
+  padding: 36rpx 36rpx 28rpx;
 }
 
 .modal-title {
   font-size: 36rpx;
   font-weight: 700;
   color: var(--color-text-main);
+  letter-spacing: 1rpx;
 }
 
 .modal-close {
@@ -443,6 +475,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.modal-close--active {
+  background: #e8ebed;
 }
 
 .close-icon {
@@ -451,7 +488,7 @@
 }
 
 .modal-body {
-  padding: 32rpx;
+  padding: 8rpx 36rpx 36rpx;
 }
 
 .form-item {
@@ -467,6 +504,7 @@
   font-size: 26rpx;
   color: var(--color-text-secondary);
   margin-bottom: 12rpx;
+  font-weight: 500;
 }
 
 .form-input-wrapper {
@@ -488,7 +526,7 @@
 .form-input {
   flex: 1;
   height: 88rpx;
-  font-size: 32rpx;
+  font-size: 30rpx;
   color: var(--color-text-main);
   border: none;
   background: transparent;
@@ -497,18 +535,18 @@
 .modal-footer {
   display: flex;
   gap: 16rpx;
-  padding: 24rpx 32rpx;
-  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+  padding: 24rpx 36rpx 32rpx;
 }
 
 .modal-btn {
   flex: 1;
-  height: 80rpx;
-  line-height: 80rpx;
+  height: 84rpx;
+  line-height: 84rpx;
   border: none;
   border-radius: var(--radius-pill);
   font-size: 30rpx;
   font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .modal-btn--secondary {
@@ -516,29 +554,22 @@
   color: var(--color-text-main);
 }
 
+.modal-btn--secondary-active {
+  background: #e8ebed;
+}
+
 .modal-btn--primary {
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #ffffff;
+  box-shadow: 0 6rpx 20rpx rgba(111, 207, 151, 0.3);
 }
 
-/* 移除自动触发动画，改为通过 class 控制 */
-.budget-item {
-  opacity: 1;
+.modal-btn--primary-active {
+  opacity: 0.85;
+  transform: scale(0.97);
 }
-/* 
-.budget-item.animate-enter {
-  animation: slideUp 0.5s ease forwards;
-  opacity: 0;
-} */
 
-/* .budget-item.animate-enter:nth-child(1) { animation-delay: 0.05s; }
-.budget-item.animate-enter:nth-child(2) { animation-delay: 0.1s; }
-.budget-item.animate-enter:nth-child(3) { animation-delay: 0.15s; }
-.budget-item.animate-enter:nth-child(4) { animation-delay: 0.2s; }
-.budget-item.animate-enter:nth-child(5) { animation-delay: 0.25s; }
-.budget-item.animate-enter:nth-child(6) { animation-delay: 0.3s; } */
-
-/* 加载状态 */
+/* ===== Loading ===== */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -555,7 +586,7 @@
 .loading-spinner {
   width: 80rpx;
   height: 80rpx;
-  border: 4rpx solid rgba(111, 207, 151, 0.2);
+  border: 4rpx solid rgba(111, 207, 151, 0.15);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -563,4 +594,32 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ===== Animations ===== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

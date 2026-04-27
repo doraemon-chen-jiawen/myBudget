@@ -11,7 +11,30 @@
       "Bash(npm install *)",
       "Bash(node -e \"const bcrypt = require\\('bcrypt'\\); bcrypt.hash\\('password123', 10\\).then\\(h => console.log\\(h\\)\\);\")",
       "Bash(mkdir -p \".claude/skills\")",
-      "Bash(mv \".agents/skills\"/* \".claude/skills/\")"
+      "Bash(mv \".agents/skills\"/* \".claude/skills/\")",
+      "Bash(ipconfig getifaddr *)",
+      "Bash(awk '{print $2}')",
+      "Bash(mysql -u root -p12345678 lazy_budget)",
+      "Read(//usr/local/mysql-9.7.0-macos15-arm64/bin/**)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(/usr/local/mysql/bin/mysql -u root -p12345678 lazy_budget)",
+      "Bash(/usr/local/mysql/bin/mysql -u root -p12345678 lazy_budget -e \"SELECT id, period_type, category_key, label, default_amount, is_system FROM budget_categories ORDER BY period_type, sort_order;\")",
+      "Bash(/usr/local/mysql/bin/mysql -u root -p12345678 lazy_budget -e \"DELETE FROM budget_categories WHERE id > 12; SELECT COUNT\\(*\\) as total FROM budget_categories;\")",
+      "Bash(lsof -ti:3000)",
+      "Bash(kill 36167)",
+      "Bash(node server.js)",
+      "Bash(curl -s http://127.0.0.1:3000/api/budget-categories?userId=1)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"http://127.0.0.1:3000/api/budget-categories?userId=1\")",
+      "Bash(curl -s -X POST \"http://127.0.0.1:3000/api/budgets/initialize-defaults\" -H \"Content-Type: application/json\" -d '{\"userId\":1,\"periodType\":\"daily\"}')",
+      "Bash(curl -s -X POST \"http://127.0.0.1:3000/api/budgets/initialize-defaults\" -H \"Content-Type: application/json\" -d '{\"userId\":1,\"periodType\":\"monthly\"}')",
+      "Bash(curl -s \"http://127.0.0.1:3000/api/budget-categories?userId=1&periodType=daily\")",
+      "Bash(curl -s \"http://192.168.3.16:3000/api/budget-categories?userId=1\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('success:', d['success'], 'count:', len\\(d['data']\\)\\)\")",
+      "Bash(curl -s -X PUT \"http://127.0.0.1:3000/api/budgets/12\" -H \"Content-Type: application/json\" -d '{\"userId\":1,\"periodType\":\"daily\",\"plannedAmount\":25,\"budgetDate\":\"2026-04-27\"}')",
+      "Bash(/usr/local/mysql/bin/mysql -u root -p12345678 lazy_budget -e \"SELECT id, user_id, period_type, period_key, budget_date, budget_month, planned_amount FROM budgets WHERE id=6;\")",
+      "Bash(curl -s -X PUT \"http://127.0.0.1:3000/api/budgets/6\" -H \"Content-Type: application/json\" -d '{\"userId\":2,\"periodType\":\"monthly\",\"periodKey\":\"monthly_daily_necessities\",\"plannedAmount\":100,\"budgetMonth\":\"2026-04\"}')",
+      "Bash(xargs kill *)"
     ]
   }
 }

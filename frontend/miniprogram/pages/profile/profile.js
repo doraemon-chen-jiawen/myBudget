@@ -4,7 +4,13 @@ Page({
       nickname: "",
       avatarUrl: ""
     },
-    userId: null
+    userId: null,
+    greeting: "Hi，你好 👋",
+    stats: {
+      days: "--",
+      count: "--",
+      saved: "--"
+    }
   },
 
   onLoad() {
@@ -18,11 +24,26 @@ Page({
   loadUserInfo() {
     const userId = wx.getStorageSync("userId");
     const token = wx.getStorageSync("token");
+    const hour = new Date().getHours();
+    let greeting = "Hi，你好 👋";
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "Hi，早上好 ☀️";
+    } else if (hour >= 12 && hour < 14) {
+      greeting = "Hi，中午好 🌤";
+    } else if (hour >= 14 && hour < 18) {
+      greeting = "Hi，下午好 🌅";
+    } else if (hour >= 18 && hour < 22) {
+      greeting = "Hi，晚上好 🌙";
+    } else {
+      greeting = "Hi，夜深了 💤";
+    }
 
     this.setData({
       userId,
+      greeting,
       userInfo: {
-        nickname: "用户" + userId || "未登录",
+        nickname: userId ? "用户" + userId : "未登录",
         avatarUrl: ""
       }
     });
@@ -32,6 +53,7 @@ Page({
     wx.showModal({
       title: "退出登录",
       content: "确定要退出登录吗？",
+      confirmColor: "#FF6B6B",
       success: (res) => {
         if (res.confirm) {
           wx.removeStorageSync("userId");

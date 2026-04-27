@@ -1,60 +1,80 @@
 <view class="register-page">
-  <view class="register-card card">
-    <view class="logo-section">
-      <text class="app-name">注册账号</text>
-      <text class="app-slogan">创建你的预算管理账户</text>
-    </view>
+  <!-- Background decorations -->
+  <view class="bg-deco bg-deco-1"></view>
+  <view class="bg-deco bg-deco-2"></view>
+  <view class="bg-deco bg-deco-3"></view>
 
-    <view class="form-section">
-      <view class="form-item">
-        <text class="form-label">用户名 *</text>
+  <!-- Branding -->
+  <view class="brand-area">
+    <view class="brand-icon">
+      <text class="brand-emoji">🌱</text>
+    </view>
+    <text class="brand-name">创建账号</text>
+    <text class="brand-slogan">开始你的预算管理之旅</text>
+  </view>
+
+  <!-- Form Card -->
+  <view class="form-card">
+    <view class="input-group">
+      <view class="input-wrap">
+        <text class="input-icon">👤</text>
         <input
-          class="form-input"
+          class="input-field"
           type="text"
           placeholder="请输入用户名"
+          placeholder-style="color: #b8c4ce"
           value="{{username}}"
           bindinput="onUsernameInput"
         />
       </view>
+    </view>
 
-      <view class="form-item">
-        <text class="form-label">密码 *</text>
+    <view class="input-group">
+      <view class="input-wrap">
+        <text class="input-icon">🔒</text>
         <input
-          class="form-input"
+          class="input-field"
           type="password"
           placeholder="请输入密码（至少6位）"
+          placeholder-style="color: #b8c4ce"
           value="{{password}}"
           bindinput="onPasswordInput"
         />
       </view>
+    </view>
 
-      <view class="form-item">
-        <text class="form-label">确认密码 *</text>
+    <view class="input-group">
+      <view class="input-wrap">
+        <text class="input-icon">🔑</text>
         <input
-          class="form-input"
+          class="input-field"
           type="password"
           placeholder="请再次输入密码"
+          placeholder-style="color: #b8c4ce"
           value="{{confirmPassword}}"
           bindinput="onConfirmPasswordInput"
         />
       </view>
+    </view>
 
-      <view class="form-item">
-        <text class="form-label">昵称</text>
+    <view class="input-group">
+      <view class="input-wrap">
+        <text class="input-icon">✨</text>
         <input
-          class="form-input"
+          class="input-field"
           type="text"
-          placeholder="请输入昵称"
+          placeholder="请输入昵称（选填）"
+          placeholder-style="color: #b8c4ce"
           value="{{nickname}}"
           bindinput="onNicknameInput"
         />
       </view>
+    </view>
 
-      <button class="register-btn" bindtap="onRegister">注册</button>
+    <button class="submit-btn" hover-class="submit-btn-active" bindtap="onRegister">注册</button>
 
-      <view class="login-link">
-        <text class="link-text" bindtap="onGoToLogin">已有账号？去登录</text>
-      </view>
+    <view class="switch-link">
+      <text class="switch-text" bindtap="onGoToLogin">已有账号？<text class="switch-highlight">去登录</text></text>
     </view>
   </view>
 </view>

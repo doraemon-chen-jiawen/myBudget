@@ -1,6 +1,7 @@
 const AppError = require("../utils/app-error");
 const { requireNumber } = require("../utils/validators");
 const budgetsDao = require("../dao/budgets.dao");
+const categoriesDao = require("../dao/budget-categories.dao");
 
 function validatePeriodType(periodType) {
   const allowed = ["daily", "monthly", "finance_interest"];
@@ -118,10 +119,62 @@ async function remove(id, userId) {
   return true;
 }
 
+async function ensureDefaultBudgets(userId, periodType) {
+  if (!userId) throw new AppError(400, "E_BAD_REQUEST", "Missing userId");
+  if (!periodType) throw new AppError(400, "E_BAD_REQUEST", "Missing periodType");
+  validatePeriodType(periodType);
+
+  // Skip finance_interest — requires account association
+  if (periodType === "finance_interest") return [];
+
+  // Check if user already has budgets for this periodType
+  const existing = await budgetsDao.listBudgets({ userId, periodType });
+  if (existing.length > 0) return [];
+
+  // Fetch system default categories
+  const categories = await categoriesDao.listCategories({ userId: null, periodType });
+  if (categories.length === 0) return [];
+
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const created = [];
+  for (const cat of categories) {
+    if (cat.default_amount == null || Number(cat.default_amount) <= 0) continue;
+
+    const periodKey = `${periodType}_${cat.category_key}`;
+    const payload = {
+      userId,
+      familyGroupId: null,
+      periodType,
+      periodKey,
+      plannedAmount: Number(cat.default_amount),
+      budgetDate: periodType === "daily" ? today : null,
+      budgetMonth: periodType !== "daily" ? monthKey : null,
+      accountId: null,
+      plannedAnnualRate: null,
+      plannedPrincipalAmount: null,
+      note: null
+    };
+
+    try {
+      const budget = await budgetsDao.createBudget(payload);
+      created.push(budget);
+    } catch (err) {
+      // ER_DUP_ENTRY — concurrent request already created it
+      if (err.code !== "ER_DUP_ENTRY") throw err;
+    }
+  }
+
+  return created;
+}
+
 module.exports = {
   list,
   create,
   update,
-  remove
+  remove,
+  ensureDefaultBudgets
 };
 

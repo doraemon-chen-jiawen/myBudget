@@ -69,10 +69,23 @@ async function remove(req, res) {
   return ok(res, true, "Budget deleted");
 }
 
+async function initializeDefaults(req, res) {
+  /**
+   * POST /api/budgets/initialize-defaults
+   * Body: { userId, periodType }
+   */
+  const created = await budgetsService.ensureDefaultBudgets(
+    Number(req.body.userId),
+    req.body.periodType
+  );
+  return ok(res, created, created.length > 0 ? "Defaults created" : "Already initialized");
+}
+
 module.exports = {
   list,
   create,
   update,
-  remove
+  remove,
+  initializeDefaults
 };
 

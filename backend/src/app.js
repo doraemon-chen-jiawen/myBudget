@@ -15,6 +15,7 @@ const familyGroupsRoute = require("./routes/family-groups");
 const autoFillRoute = require("./routes/auto-fill");
 const familyRoute = require("./routes/family");
 const homeRoute = require("./routes/home");
+const budgetCategoriesRoute = require("./routes/budget-categories");
 const { notFoundHandler, errorHandler } = require("./middleware/error-handler");
 
 const app = express();
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 app.use("/api/health", healthRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/budgets", budgetsRoute);
+app.use("/api/budget-categories", budgetCategoriesRoute);
 app.use("/api/records", recordsRoute);
 app.use("/api/bank-accounts", bankAccountsRoute);
 app.use("/api/finance-accounts", financeAccountsRoute);
