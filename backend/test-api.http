@@ -1,0 +1,155 @@
+@baseUrl = http://localhost:3000/api
+@userOpenid = wx_test_u1
+@user2Openid = wx_test_u2
+@month = 2026-03
+@date = 2026-03-26
+
+### 0. health
+GET {{baseUrl}}/health
+
+### 1. login user1
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "wechatOpenid": "{{userOpenid}}",
+  "nickname": "User1"
+}
+
+### 2. create saving account (replace userId)
+POST {{baseUrl}}/bank-accounts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "accountName": "Saving Card A",
+  "bankName": "CMB",
+  "balance": 5000
+}
+
+### 3. create finance account (replace userId)
+POST {{baseUrl}}/finance-accounts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "accountName": "Stock Account A",
+  "provider": "Broker A",
+  "principalAmount": 100000,
+  "expectedAnnualRate": 0.1
+}
+
+### 4. list saving accounts
+GET {{baseUrl}}/bank-accounts?userId=1
+
+### 5. list finance accounts
+GET {{baseUrl}}/finance-accounts?userId=1
+
+### 6. create daily budget
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "periodType": "daily",
+  "budgetDate": "{{date}}",
+  "plannedAmount": 120
+}
+
+### 7. create finance_interest budget (replace accountId)
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "periodType": "finance_interest",
+  "budgetMonth": "{{month}}",
+  "accountId": 2,
+  "plannedAnnualRate": 0.1,
+  "plannedPrincipalAmount": 100000
+}
+
+### 8. list budgets
+GET {{baseUrl}}/budgets?userId=1
+
+### 9. invalid finance_interest (saving account id, should fail)
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "periodType": "finance_interest",
+  "budgetMonth": "{{month}}",
+  "accountId": 1,
+  "plannedAnnualRate": 0.05,
+  "plannedPrincipalAmount": 5000
+}
+
+### 10. create record
+POST {{baseUrl}}/records
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "recordType": "expense",
+  "amount": 38.5,
+  "recordDate": "{{date}}",
+  "accountId": 1,
+  "categorySnapshot": "Food",
+  "note": "Lunch"
+}
+
+### 11. list records
+GET {{baseUrl}}/records?userId=1&recordMonth={{month}}
+
+### 12. update record (replace record id)
+PUT {{baseUrl}}/records/1
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "recordType": "expense",
+  "amount": 40,
+  "recordDate": "{{date}}",
+  "accountId": 1,
+  "categorySnapshot": "Food",
+  "note": "Lunch fixed"
+}
+
+### 13. create family group
+POST {{baseUrl}}/family-groups
+Content-Type: application/json
+
+{
+  "ownerUserId": 1,
+  "name": "My Family"
+}
+
+### 14. list family groups
+GET {{baseUrl}}/family-groups?ownerUserId=1
+
+### 15. login user2
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "wechatOpenid": "{{user2Openid}}",
+  "nickname": "User2"
+}
+
+### 16. add family member (replace groupId and user2 id)
+POST {{baseUrl}}/family-groups/1/members
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "role": "member",
+  "status": "active"
+}
+
+### 17. list family members
+GET {{baseUrl}}/family-groups/1/members
+
+### 18. 404 check
+GET {{baseUrl}}/not-exists
+

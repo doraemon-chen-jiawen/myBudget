@@ -1,0 +1,9 @@
+{
+  "desc": "myBudget sitemap",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
+}

@@ -1,0 +1,953 @@
+openapi: 3.0.3
+info:
+  title: myBudget Backend API
+  version: 1.0.0
+  description: |
+    OpenAPI document for myBudget backend.
+    Stack: Express + MySQL.
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: Budgets
+  - name: Records
+  - name: Home
+  - name: BankAccounts
+  - name: FinanceAccounts
+  - name: FamilyGroups
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        "200":
+          description: Service and DB status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: Service is running }
+                  database: { type: string, example: connected }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login by WeChat openid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessUserResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /budgets:
+    get:
+      tags: [Budgets]
+      summary: List budgets
+      parameters:
+        - $ref: "#/components/parameters/UserIdQuery"
+        - in: query
+          name: familyGroupId
+          schema: { type: integer }
+        - in: query
+          name: periodType
+          schema:
+            type: string
+            enum: [daily, monthly, finance_interest]
+        - in: query
+          name: periodKey
+          schema: { type: string, example: "2026-03" }
+      responses:
+        "200":
+          description: Budget list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBudgetListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Budgets]
+      summary: Create budget
+      description: |
+        periodType rules:
+        - daily: budgetDate + plannedAmount
+        - monthly: budgetMonth + plannedAmount
+        - finance_interest: budgetMonth + accountId + plannedAnnualRate + plannedPrincipalAmount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/BudgetCreateDailyRequest"
+                - $ref: "#/components/schemas/BudgetCreateMonthlyRequest"
+                - $ref: "#/components/schemas/BudgetCreateFinanceInterestRequest"
+      responses:
+        "200":
+          description: Budget created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBudgetResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /budgets/{id}:
+    put:
+      tags: [Budgets]
+      summary: Update budget
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/BudgetCreateDailyRequest"
+                - $ref: "#/components/schemas/BudgetCreateMonthlyRequest"
+                - $ref: "#/components/schemas/BudgetCreateFinanceInterestRequest"
+      responses:
+        "200":
+          description: Budget updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBudgetResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Budgets]
+      summary: Delete budget
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer }
+      responses:
+        "200":
+          description: Budget deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBooleanResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /records:
+    get:
+      tags: [Records]
+      summary: List records
+      parameters:
+        - $ref: "#/components/parameters/UserIdQuery"
+        - in: query
+          name: familyGroupId
+          schema: { type: integer }
+        - in: query
+          name: recordType
+          schema:
+            type: string
+            enum: [income, expense]
+        - in: query
+          name: recordMonth
+          schema: { type: string, example: "2026-03" }
+        - in: query
+          name: dateFrom
+          schema: { type: string, format: date }
+        - in: query
+          name: dateTo
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Record list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRecordListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+    post:
+      tags: [Records]
+      summary: Create record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordCreateRequest"
+      responses:
+        "200":
+          description: Record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRecordResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /records/{id}:
+    put:
+      tags: [Records]
+      summary: Update record
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordCreateRequest"
+      responses:
+        "200":
+          description: Record updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRecordResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [Records]
+      summary: Delete record
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer }
+      responses:
+        "200":
+          description: Record deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBooleanResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /home/index:
+    get:
+      tags: [Home]
+      summary: Home index aggregated data
+      parameters:
+        - $ref: "#/components/parameters/UserIdQuery"
+        - in: query
+          name: date
+          required: false
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Home index data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessHomeIndexResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /home/quick-record:
+    post:
+      tags: [Home]
+      summary: Create one quick expense record and return latest home data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuickRecordRequest"
+      responses:
+        "200":
+          description: Quick record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessHomeIndexResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /bank-accounts:
+    get:
+      tags: [BankAccounts]
+      summary: List saving accounts
+      parameters:
+        - $ref: "#/components/parameters/UserIdQuery"
+        - in: query
+          name: familyGroupId
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Saving account list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAccountListResponse"
+    post:
+      tags: [BankAccounts]
+      summary: Create saving account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingAccountCreateRequest"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAccountResponse"
+
+  /bank-accounts/{id}:
+    put:
+      tags: [BankAccounts]
+      summary: Update saving account
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingAccountCreateRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAccountResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [BankAccounts]
+      summary: Delete saving account
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBooleanResponse"
+
+  /finance-accounts:
+    get:
+      tags: [FinanceAccounts]
+      summary: List finance accounts
+      parameters:
+        - $ref: "#/components/parameters/UserIdQuery"
+        - in: query
+          name: familyGroupId
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Finance account list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAccountListResponse"
+    post:
+      tags: [FinanceAccounts]
+      summary: Create finance account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinanceAccountCreateRequest"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAccountResponse"
+
+  /finance-accounts/{id}:
+    put:
+      tags: [FinanceAccounts]
+      summary: Update finance account
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinanceAccountCreateRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAccountResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags: [FinanceAccounts]
+      summary: Delete finance account
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBooleanResponse"
+
+  /family-groups:
+    get:
+      tags: [FamilyGroups]
+      summary: List family groups
+      parameters:
+        - in: query
+          name: ownerUserId
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Group list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFamilyGroupListResponse"
+    post:
+      tags: [FamilyGroups]
+      summary: Create family group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FamilyGroupCreateRequest"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFamilyGroupResponse"
+
+  /family-groups/{id}:
+    get:
+      tags: [FamilyGroups]
+      summary: Get family group by id
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: One group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFamilyGroupResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    put:
+      tags: [FamilyGroups]
+      summary: Update family group
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FamilyGroupCreateRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFamilyGroupResponse"
+    delete:
+      tags: [FamilyGroups]
+      summary: Delete family group
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ownerUserId]
+              properties:
+                ownerUserId: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessBooleanResponse"
+
+  /family-groups/{id}/members:
+    get:
+      tags: [FamilyGroups]
+      summary: List members by group id
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Member list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFamilyMemberListResponse"
+    post:
+      tags: [FamilyGroups]
+      summary: Add family member
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FamilyMemberAddRequest"
+      responses:
+        "200":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFamilyMemberResponse"
+
+components:
+  parameters:
+    IdPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+    UserIdQuery:
+      in: query
+      name: userId
+      required: true
+      schema:
+        type: integer
+
+  responses:
+    ErrorResponse:
+      description: Unified error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        code: { type: string, example: E_BAD_REQUEST }
+        message: { type: string, example: Missing userId }
+        details:
+          nullable: true
+          description: Optional extra error details
+
+    SuccessBooleanResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: deleted }
+        data: { type: boolean, example: true }
+
+    LoginRequest:
+      type: object
+      required: [wechatOpenid]
+      properties:
+        wechatOpenid: { type: string }
+        nickname: { type: string }
+        avatarUrl: { type: string }
+        phone: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        wechat_openid: { type: string }
+        nickname: { type: string }
+        avatar_url: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        timezone: { type: string }
+        is_active: { type: integer }
+        created_at: { type: string }
+        updated_at: { type: string }
+
+    SuccessUserResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Login success }
+        data:
+          $ref: "#/components/schemas/User"
+
+    Budget:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        family_group_id: { type: integer, nullable: true }
+        period_type: { type: string, enum: [daily, monthly, finance_interest] }
+        period_key: { type: string }
+        budget_date: { type: string, nullable: true }
+        budget_month: { type: string, nullable: true }
+        account_id: { type: integer, nullable: true }
+        planned_amount: { type: number, nullable: true }
+        planned_annual_rate: { type: number, nullable: true }
+        planned_principal_amount: { type: number, nullable: true }
+        planned_interest_amount: { type: number, nullable: true }
+        note: { type: string, nullable: true }
+        created_at: { type: string }
+        updated_at: { type: string }
+
+    BudgetCreateDailyRequest:
+      type: object
+      required: [userId, periodType, budgetDate, plannedAmount]
+      properties:
+        userId: { type: integer }
+        familyGroupId: { type: integer, nullable: true }
+        periodType: { type: string, enum: [daily], example: daily }
+        periodKey: { type: string, nullable: true }
+        budgetDate: { type: string, format: date }
+        plannedAmount: { type: number, example: 120 }
+        note: { type: string, nullable: true }
+
+    BudgetCreateMonthlyRequest:
+      type: object
+      required: [userId, periodType, budgetMonth, plannedAmount]
+      properties:
+        userId: { type: integer }
+        familyGroupId: { type: integer, nullable: true }
+        periodType: { type: string, enum: [monthly], example: monthly }
+        periodKey: { type: string, nullable: true }
+        budgetMonth: { type: string, example: "2026-03" }
+        plannedAmount: { type: number, example: 3000 }
+        note: { type: string, nullable: true }
+
+    BudgetCreateFinanceInterestRequest:
+      type: object
+      required: [userId, periodType, budgetMonth, accountId, plannedAnnualRate, plannedPrincipalAmount]
+      properties:
+        userId: { type: integer }
+        familyGroupId: { type: integer, nullable: true }
+        periodType: { type: string, enum: [finance_interest], example: finance_interest }
+        periodKey: { type: string, nullable: true }
+        budgetMonth: { type: string, example: "2026-03" }
+        accountId: { type: integer }
+        plannedAnnualRate: { type: number, example: 0.1 }
+        plannedPrincipalAmount: { type: number, example: 100000 }
+        note: { type: string, nullable: true }
+
+    SuccessBudgetResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Budget created }
+        data:
+          $ref: "#/components/schemas/Budget"
+
+    SuccessBudgetListResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: ok }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Budget"
+
+    Record:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        family_group_id: { type: integer, nullable: true }
+        record_type: { type: string, enum: [income, expense] }
+        amount: { type: number }
+        currency: { type: string }
+        record_date: { type: string }
+        record_month: { type: string }
+        frequent_item_id: { type: integer, nullable: true }
+        category_snapshot: { type: string, nullable: true }
+        account_id: { type: integer, nullable: true }
+        note: { type: string, nullable: true }
+        source: { type: string }
+        source_reference: { type: string, nullable: true }
+        created_at: { type: string }
+        updated_at: { type: string }
+
+    RecordCreateRequest:
+      type: object
+      required: [userId, recordType, amount, recordDate]
+      properties:
+        userId: { type: integer }
+        familyGroupId: { type: integer, nullable: true }
+        recordType: { type: string, enum: [income, expense] }
+        amount: { type: number }
+        currency: { type: string, example: CNY }
+        recordDate: { type: string, format: date }
+        recordMonth: { type: string, nullable: true, description: "Optional, auto-derived from recordDate if absent" }
+        frequentItemId: { type: integer, nullable: true }
+        categorySnapshot: { type: string, nullable: true }
+        accountId: { type: integer, nullable: true }
+        note: { type: string, nullable: true }
+        source: { type: string, nullable: true, example: manual }
+        sourceReference: { type: string, nullable: true }
+
+    SuccessRecordResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Record created }
+        data:
+          $ref: "#/components/schemas/Record"
+
+    SuccessRecordListResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: ok }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Record"
+
+    HomeQuickItem:
+      type: object
+      properties:
+        key: { type: string, example: breakfast }
+        label: { type: string, example: 早餐 }
+        amount: { type: number, example: 12 }
+        count: { type: integer, example: 2 }
+
+    HomeIndexData:
+      type: object
+      properties:
+        today: { type: string, format: date }
+        budgetTotal: { type: number, example: 120 }
+        actualTotal: { type: number, example: 45 }
+        remainTotal: { type: number, example: 75 }
+        quickItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/HomeQuickItem"
+
+    SuccessHomeIndexResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: ok }
+        data:
+          $ref: "#/components/schemas/HomeIndexData"
+
+    QuickRecordRequest:
+      type: object
+      required: [userId, key]
+      properties:
+        userId: { type: integer }
+        key: { type: string, example: breakfast }
+        date: { type: string, format: date, nullable: true }
+
+    Account:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        family_group_id: { type: integer, nullable: true }
+        account_kind: { type: string, enum: [saving, finance] }
+        account_name: { type: string }
+        bank_name: { type: string, nullable: true }
+        provider: { type: string, nullable: true }
+        currency: { type: string }
+        balance: { type: number, nullable: true }
+        credit_limit: { type: number, nullable: true }
+        last_balance_updated_at: { type: string, nullable: true }
+        principal_amount: { type: number, nullable: true }
+        expected_annual_rate: { type: number, nullable: true }
+        is_default: { type: integer }
+        is_active: { type: integer }
+        created_at: { type: string }
+        updated_at: { type: string }
+
+    SavingAccountCreateRequest:
+      type: object
+      required: [userId, accountName]
+      properties:
+        userId: { type: integer }
+        familyGroupId: { type: integer, nullable: true }
+        accountName: { type: string }
+        bankName: { type: string, nullable: true }
+        currency: { type: string, example: CNY }
+        balance: { type: number, nullable: true }
+        creditLimit: { type: number, nullable: true }
+        lastBalanceUpdatedAt: { type: string, nullable: true }
+        isDefault: { type: integer, nullable: true, example: 0 }
+        isActive: { type: integer, nullable: true, example: 1 }
+
+    FinanceAccountCreateRequest:
+      type: object
+      required: [userId, accountName]
+      properties:
+        userId: { type: integer }
+        familyGroupId: { type: integer, nullable: true }
+        accountName: { type: string }
+        provider: { type: string, nullable: true }
+        bankName: { type: string, nullable: true }
+        currency: { type: string, example: CNY }
+        principalAmount: { type: number, nullable: true }
+        expectedAnnualRate: { type: number, nullable: true }
+        isDefault: { type: integer, nullable: true, example: 0 }
+        isActive: { type: integer, nullable: true, example: 1 }
+
+    SuccessAccountResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Account updated }
+        data:
+          $ref: "#/components/schemas/Account"
+
+    SuccessAccountListResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: ok }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Account"
+
+    FamilyGroup:
+      type: object
+      properties:
+        id: { type: integer }
+        owner_user_id: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        created_at: { type: string }
+        updated_at: { type: string }
+
+    FamilyGroupCreateRequest:
+      type: object
+      required: [ownerUserId, name]
+      properties:
+        ownerUserId: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+
+    SuccessFamilyGroupResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Family group created }
+        data:
+          $ref: "#/components/schemas/FamilyGroup"
+
+    SuccessFamilyGroupListResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: ok }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FamilyGroup"
+
+    FamilyMember:
+      type: object
+      properties:
+        id: { type: integer }
+        family_group_id: { type: integer }
+        user_id: { type: integer }
+        role: { type: string, enum: [owner, member] }
+        status: { type: string, enum: [active, invited, left, removed] }
+        joined_at: { type: string }
+        last_seen_at: { type: string, nullable: true }
+        wechat_openid: { type: string }
+        nickname: { type: string }
+        avatar_url: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+
+    FamilyMemberAddRequest:
+      type: object
+      required: [userId]
+      properties:
+        userId: { type: integer }
+        role: { type: string, enum: [owner, member], default: member }
+        status: { type: string, enum: [active, invited, left, removed], default: active }
+
+    SuccessFamilyMemberResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Member added }
+        data:
+          type: object
+
+    SuccessFamilyMemberListResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: ok }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FamilyMember"
+

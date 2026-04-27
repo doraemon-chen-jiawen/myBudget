@@ -1,0 +1,227 @@
+{
+  "info": {
+    "_postman_id": "8fca9cb8-49da-44d9-8e91-f9d36e04d433",
+    "name": "myBudget API Validation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "16-step validation collection for myBudget backend."
+  },
+  "item": [
+    {
+      "name": "0. Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "1. Login User1",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"wechatOpenid\": \"wx_test_u1\",\n  \"nickname\": \"User1\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "2. Create Saving Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"accountName\": \"Saving Card A\",\n  \"bankName\": \"CMB\",\n  \"balance\": 5000\n}"
+        },
+        "url": "{{baseUrl}}/bank-accounts"
+      }
+    },
+    {
+      "name": "3. Create Finance Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"accountName\": \"Stock Account A\",\n  \"provider\": \"Broker A\",\n  \"principalAmount\": 100000,\n  \"expectedAnnualRate\": 0.1\n}"
+        },
+        "url": "{{baseUrl}}/finance-accounts"
+      }
+    },
+    {
+      "name": "4. List Saving Accounts",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/bank-accounts?userId=1"
+      }
+    },
+    {
+      "name": "5. List Finance Accounts",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/finance-accounts?userId=1"
+      }
+    },
+    {
+      "name": "6. Create Daily Budget",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"periodType\": \"daily\",\n  \"budgetDate\": \"2026-03-26\",\n  \"plannedAmount\": 120\n}"
+        },
+        "url": "{{baseUrl}}/budgets"
+      }
+    },
+    {
+      "name": "7. Create Finance Interest Budget",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"periodType\": \"finance_interest\",\n  \"budgetMonth\": \"2026-03\",\n  \"accountId\": 2,\n  \"plannedAnnualRate\": 0.1,\n  \"plannedPrincipalAmount\": 100000\n}"
+        },
+        "url": "{{baseUrl}}/budgets"
+      }
+    },
+    {
+      "name": "8. List Budgets",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/budgets?userId=1"
+      }
+    },
+    {
+      "name": "9. Invalid Finance Budget (should fail)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"periodType\": \"finance_interest\",\n  \"budgetMonth\": \"2026-03\",\n  \"accountId\": 1,\n  \"plannedAnnualRate\": 0.05,\n  \"plannedPrincipalAmount\": 5000\n}"
+        },
+        "url": "{{baseUrl}}/budgets"
+      }
+    },
+    {
+      "name": "10. Create Record",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"recordType\": \"expense\",\n  \"amount\": 38.5,\n  \"recordDate\": \"2026-03-26\",\n  \"accountId\": 1,\n  \"categorySnapshot\": \"Food\",\n  \"note\": \"Lunch\"\n}"
+        },
+        "url": "{{baseUrl}}/records"
+      }
+    },
+    {
+      "name": "11. List Records",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/records?userId=1&recordMonth=2026-03"
+      }
+    },
+    {
+      "name": "12. Update Record",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"recordType\": \"expense\",\n  \"amount\": 40,\n  \"recordDate\": \"2026-03-26\",\n  \"accountId\": 1,\n  \"categorySnapshot\": \"Food\",\n  \"note\": \"Lunch fixed\"\n}"
+        },
+        "url": "{{baseUrl}}/records/1"
+      }
+    },
+    {
+      "name": "13. Create Family Group",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ownerUserId\": 1,\n  \"name\": \"My Family\"\n}"
+        },
+        "url": "{{baseUrl}}/family-groups"
+      }
+    },
+    {
+      "name": "14. List Family Groups",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/family-groups?ownerUserId=1"
+      }
+    },
+    {
+      "name": "15. Login User2",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"wechatOpenid\": \"wx_test_u2\",\n  \"nickname\": \"User2\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "16. Add Family Member",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 2,\n  \"role\": \"member\",\n  \"status\": \"active\"\n}"
+        },
+        "url": "{{baseUrl}}/family-groups/1/members"
+      }
+    },
+    {
+      "name": "17. List Family Members",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/family-groups/1/members"
+      }
+    },
+    {
+      "name": "18. 404 Check",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/not-exists"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    }
+  ]
+}
+
