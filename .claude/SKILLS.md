@@ -1,0 +1,3 @@
+- [find-skills](skills/find-skills/) — Helps users discover and install agent skills from the open skills ecosystem
+- [fresh-light-dense-cards](skills/fresh-light-dense-cards/) — Light, airy, high-information-density card UI style with minimal user actions
+- [frontend-design](skills/frontend-design/) — Create distinctive, production-grade frontend interfaces with high design quality

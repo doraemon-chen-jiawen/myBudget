@@ -1,0 +1,566 @@
+/* 有机柔软的触控式卡片设计系统 */
+.budget-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: 160rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景装饰 */
+.budget-page::before {
+  content: "";
+  position: fixed;
+  top: -200rpx;
+  right: -200rpx;
+  width: 600rpx;
+  height: 600rpx;
+  background: radial-gradient(circle, rgba(111, 207, 151, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.budget-page::after {
+  content: "";
+  position: fixed;
+  bottom: -100rpx;
+  left: -100rpx;
+  width: 400rpx;
+  height: 400rpx;
+  background: radial-gradient(circle, rgba(86, 204, 242, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 页面标题区域 */
+.page-header {
+  padding: 40rpx 32rpx 24rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 8rpx;
+  margin-right: 16rpx;
+  letter-spacing: -0.5rpx;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+/* 有机形状标签切换器 */
+.tabs-container {
+  padding: 0 24rpx;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 32rpx;
+}
+
+.tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.6);
+  /* backdrop-filter: blur(20rpx); */
+  padding: 8rpx;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 活动指示器 - 滑动效果 */
+.tabs-indicator {
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  width: calc((100% - 32rpx) / 3);
+  height: calc(100% - 16rpx);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--radius-pill);
+  /* transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); */
+  z-index: 0;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  /* transition: color 0.3s ease; */
+}
+
+.tab--active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* 预算列表 */
+.budget-list {
+  padding: 0 24rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.budget-item {
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  padding: 32rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--shadow-elevated);
+  position: relative;
+  overflow: hidden;
+  /* transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); */
+  border: 2rpx solid transparent;
+}
+
+.budget-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8rpx;
+  height: 100%;
+  background: linear-gradient(180deg, var(--item-color, var(--color-primary)), var(--item-color-light, rgba(111, 207, 151, 0.3)));
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+  opacity: 0.6;
+  /* transition: opacity 0.3s ease; */
+}
+
+.budget-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 8rpx 24rpx rgba(30, 41, 59, 0.06);
+}
+
+.budget-item:focus-within {
+  border-color: var(--item-color, var(--color-primary));
+}
+
+.budget-item:focus-within::before {
+  opacity: 1;
+}
+
+.budget-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+/* 操作按钮组 */
+.budget-actions {
+  display: flex;
+  gap: 8rpx;
+  align-items: center;
+}
+
+.action-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--radius-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  transition: all 0.2s ease;
+}
+
+/* .action-btn:active {
+  transform: scale(0.9);
+} */
+
+.action-icon {
+  font-size: 28rpx;
+}
+
+.action-btn--edit:active {
+  background: var(--color-primary);
+}
+
+/* .action-btn--edit:active .action-icon {
+  filter: brightness(0) invert(1);
+} */
+
+.action-btn--delete:active {
+  background: var(--color-danger-light);
+}
+
+.action-btn--delete-custom {
+  background: var(--color-danger-light);
+}
+
+.action-btn--delete-custom:active {
+  background: var(--color-danger);
+}
+
+/* .action-btn--delete-custom:active .action-icon {
+  filter: brightness(0) invert(1);
+} */
+
+.budget-icon {
+  width: 56rpx;
+  height: 56rpx;
+  background: var(--item-bg, rgba(111, 207, 151, 0.1));
+  border-radius: var(--radius-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.budget-label-group {
+  flex: 1;
+}
+
+.budget-label {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin-bottom: 4rpx;
+}
+
+.budget-hint {
+  font-size: 22rpx;
+  color: var(--color-text-hint);
+}
+
+/* 预算输入区域 */
+.budget-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-right: 8rpx;
+}
+
+.budget-input {
+  flex: 1;
+  height: 88rpx;
+  padding: 0 20rpx;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+  background: var(--color-bg);
+  border: none;
+  border-radius: var(--radius-smooth);
+  box-shadow: var(--shadow-inset);
+  text-align: right;
+  transition: all 0.3s ease;
+}
+
+.budget-input:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 3rpx var(--item-color, rgba(111, 207, 151, 0.2));
+}
+
+/* 快捷金额按钮 */
+.quick-amounts {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.quick-amount-btn {
+  flex: 1;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  background: var(--color-bg);
+  border: 2rpx solid transparent;
+  border-radius: var(--radius-smooth);
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.quick-amount-btn:active {
+  background: var(--item-bg, rgba(111, 207, 151, 0.15));
+  border-color: var(--item-color, var(--color-primary));
+  color: var(--item-color, var(--color-primary));
+  transform: scale(0.95);
+}
+
+/* 添加分类按钮 */
+.add-category-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  height: 96rpx;
+  margin-top: 24rpx;
+  background: rgba(111, 207, 151, 0.1);
+  border: 2rpx dashed var(--color-primary);
+  border-radius: var(--radius-card);
+  color: var(--color-primary);
+  font-size: 28rpx;
+  font-weight: 600;
+  /* transition: all 0.3s ease; */
+}
+
+.add-category-btn:active {
+  background: rgba(111, 207, 151, 0.2);
+  transform: scale(0.98);
+}
+
+.add-icon {
+  font-size: 32rpx;
+}
+
+/* 底部操作按钮 */
+.action-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20rpx);
+  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.btn {
+  flex: 1;
+  height: 96rpx;
+  line-height: 96rpx;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 32rpx;
+  font-weight: 600;
+  padding: 0;
+  /* transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); */
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #ffffff;
+  box-shadow: 0 8rpx 24rpx rgba(111, 207, 151, 0.4);
+}
+
+.btn--primary:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 12rpx rgba(111, 207, 151, 0.3);
+}
+
+.btn--secondary {
+  background: var(--color-bg);
+  color: var(--color-text-main);
+  border: 2rpx solid rgba(0, 0, 0, 0.05);
+}
+
+.btn--secondary:active {
+  background: #f0f0f0;
+  transform: scale(0.95);
+}
+
+/* 模态框 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal--show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8rpx);
+}
+
+.modal-content {
+  position: relative;
+  width: 600rpx;
+  background: #ffffff;
+  border-radius: var(--radius-modal);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  transform: scale(0.9) translateY(40rpx);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal--show .modal-content {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 32rpx 24rpx;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.modal-close {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-icon {
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+}
+
+.modal-body {
+  padding: 32rpx;
+}
+
+.form-item {
+  margin-bottom: 24rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  margin-bottom: 12rpx;
+}
+
+.form-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg);
+  border-radius: var(--radius-smooth);
+  padding: 0 20rpx;
+  box-shadow: var(--shadow-inset);
+}
+
+.form-currency {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-right: 8rpx;
+}
+
+.form-input {
+  flex: 1;
+  height: 88rpx;
+  font-size: 32rpx;
+  color: var(--color-text-main);
+  border: none;
+  background: transparent;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+}
+
+.modal-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.modal-btn--secondary {
+  background: var(--color-bg);
+  color: var(--color-text-main);
+}
+
+.modal-btn--primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #ffffff;
+}
+
+/* 移除自动触发动画，改为通过 class 控制 */
+.budget-item {
+  opacity: 1;
+}
+/* 
+.budget-item.animate-enter {
+  animation: slideUp 0.5s ease forwards;
+  opacity: 0;
+} */
+
+/* .budget-item.animate-enter:nth-child(1) { animation-delay: 0.05s; }
+.budget-item.animate-enter:nth-child(2) { animation-delay: 0.1s; }
+.budget-item.animate-enter:nth-child(3) { animation-delay: 0.15s; }
+.budget-item.animate-enter:nth-child(4) { animation-delay: 0.2s; }
+.budget-item.animate-enter:nth-child(5) { animation-delay: 0.25s; }
+.budget-item.animate-enter:nth-child(6) { animation-delay: 0.3s; } */
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 80rpx;
+  height: 80rpx;
+  border: 4rpx solid rgba(111, 207, 151, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

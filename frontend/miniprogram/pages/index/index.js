@@ -10,6 +10,8 @@ function formatDate(date = new Date()) {
 Page({
   data: {
     today: "",
+    month: "",
+    day: "",
     budgetTotal: 0,
     actualTotal: 0,
     remainTotal: 0,
@@ -17,8 +19,12 @@ Page({
   },
 
   onLoad() {
+    const date = formatDate();
+    const now = new Date();
     this.setData({
-      today: formatDate()
+      today: date,
+      month: `${now.getMonth() + 1}`.padStart(2, "0"),
+      day: `${now.getDate()}`.padStart(2, "0")
     });
   },
 

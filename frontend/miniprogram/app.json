@@ -1,13 +1,37 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/login/login",
+    "pages/register/register",
+    "pages/index/index",
+    "pages/budget/budget",
+    "pages/profile/profile"
   ],
   "window": {
     "navigationBarTitleText": "myBudget",
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "backgroundTextStyle": "light",
-    "backgroundColor": "#f5f5f5"
+    "backgroundColor": "#F7F9FB"
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#6FCF97",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "icons/home.png",
+        "selectedIconPath": "icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "icons/profile.png",
+        "selectedIconPath": "icons/profile-active.png"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

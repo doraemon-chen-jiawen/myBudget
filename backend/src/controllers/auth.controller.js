@@ -1,20 +1,32 @@
 const { ok } = require("../utils/response");
-const { loginByOpenid } = require("../services/auth.service");
+const { loginByOpenid, loginByUsernamePassword, registerUser } = require("../services/auth.service");
 
 /**
  * Controller: auth
  */
 async function login(req, res) {
-  /**
-   * 用户登录（微信 openid）
-   * POST /api/auth/login
-   * body: { wechatOpenid, nickname?, avatarUrl?, phone? }
-   */
-  const user = await loginByOpenid(req.body);
-  return ok(res, user, "Login success");
+  const { username, password, wechatOpenid } = req.body;
+
+  if (username && password) {
+    const user = await loginByUsernamePassword({ username, password });
+    return ok(res, user, "Login success");
+  }
+
+  if (wechatOpenid) {
+    const user = await loginByOpenid(req.body);
+    return ok(res, user, "Login success");
+  }
+
+  throw new Error("Missing credentials: either (username, password) or wechatOpenid is required");
+}
+
+async function register(req, res) {
+  const user = await registerUser(req.body);
+  return ok(res, user, "Registration success");
 }
 
 module.exports = {
-  login
+  login,
+  register
 };
 

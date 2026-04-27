@@ -1,0 +1,96 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #d7f6e2, #d8f2ff);
+  padding: 40rpx;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 560rpx;
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 60rpx 48rpx;
+  box-shadow: 0 20rpx 60rpx rgba(36, 56, 80, 0.1);
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.app-name {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #2f4f4f;
+  margin-bottom: 12rpx;
+}
+
+.app-slogan {
+  display: block;
+  font-size: 26rpx;
+  color: #888888;
+}
+
+.form-section {
+  margin-bottom: 20rpx;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 12rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  border: 2rpx solid #eef2f5;
+  border-radius: 16rpx;
+  background: #f9fbfd;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #6fcf97;
+  background: #ffffff;
+}
+
+.register-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  border: none;
+  border-radius: 20rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #56ccf2, #6fcf97);
+  margin-top: 24rpx;
+  padding: 0;
+}
+
+.register-btn::after {
+  border: none;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 32rpx;
+}
+
+.link-text {
+  font-size: 26rpx;
+  color: #56ccf2;
+}

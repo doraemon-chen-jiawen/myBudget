@@ -1,5 +1,36 @@
+/* 全局 CSS 变量 */
 page {
-  background: #f5f7fb;
-  color: #1f2d3d;
+  /* 核心色彩 - 温暖而柔和 */
+  --color-primary: #6FCF97;
+  --color-primary-dark: #5AB87A;
+  --color-accent: #56CCF2;
+  --color-accent-dark: #42B4D6;
+  --color-warm: #FFB38A;
+  --color-soft-purple: #A78BFA;
+  --color-mint: #4ADE80;
+  --color-danger: #FF6B6B;
+  --color-danger-light: #FFE5E5;
+
+  /* 中性色 */
+  --color-bg: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-text-main: #1E293B;
+  --color-text-secondary: #64748B;
+  --color-text-hint: #94A3B8;
+
+  /* 有机形状 */
+  --radius-smooth: 24rpx;
+  --radius-pill: 1000rpx;
+  --radius-card: 32rpx;
+  --radius-modal: 40rpx;
+
+  /* 柔和阴影 */
+  --shadow-soft: 0 8rpx 32rpx rgba(113, 150, 129, 0.12);
+  --shadow-elevated: 0 16rpx 48rpx rgba(30, 41, 59, 0.08);
+  --shadow-inset: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 24rpx 80rpx rgba(0, 0, 0, 0.2);
+
+  background: #F8FAFC;
+  color: var(--color-text-main);
   font-size: 28rpx;
 }

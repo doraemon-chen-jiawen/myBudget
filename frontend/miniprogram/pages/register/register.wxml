@@ -1,0 +1,60 @@
+<view class="register-page">
+  <view class="register-card card">
+    <view class="logo-section">
+      <text class="app-name">注册账号</text>
+      <text class="app-slogan">创建你的预算管理账户</text>
+    </view>
+
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label">用户名 *</text>
+        <input
+          class="form-input"
+          type="text"
+          placeholder="请输入用户名"
+          value="{{username}}"
+          bindinput="onUsernameInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">密码 *</text>
+        <input
+          class="form-input"
+          type="password"
+          placeholder="请输入密码（至少6位）"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">确认密码 *</text>
+        <input
+          class="form-input"
+          type="password"
+          placeholder="请再次输入密码"
+          value="{{confirmPassword}}"
+          bindinput="onConfirmPasswordInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input
+          class="form-input"
+          type="text"
+          placeholder="请输入昵称"
+          value="{{nickname}}"
+          bindinput="onNicknameInput"
+        />
+      </view>
+
+      <button class="register-btn" bindtap="onRegister">注册</button>
+
+      <view class="login-link">
+        <text class="link-text" bindtap="onGoToLogin">已有账号？去登录</text>
+      </view>
+    </view>
+  </view>
+</view>
