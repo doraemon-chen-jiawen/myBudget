@@ -34,7 +34,8 @@
       "Bash(curl -s -X PUT \"http://127.0.0.1:3000/api/budgets/12\" -H \"Content-Type: application/json\" -d '{\"userId\":1,\"periodType\":\"daily\",\"plannedAmount\":25,\"budgetDate\":\"2026-04-27\"}')",
       "Bash(/usr/local/mysql/bin/mysql -u root -p12345678 lazy_budget -e \"SELECT id, user_id, period_type, period_key, budget_date, budget_month, planned_amount FROM budgets WHERE id=6;\")",
       "Bash(curl -s -X PUT \"http://127.0.0.1:3000/api/budgets/6\" -H \"Content-Type: application/json\" -d '{\"userId\":2,\"periodType\":\"monthly\",\"periodKey\":\"monthly_daily_necessities\",\"plannedAmount\":100,\"budgetMonth\":\"2026-04\"}')",
-      "Bash(xargs kill *)"
+      "Bash(xargs kill *)",
+      "Bash(python3)"
     ]
   }
 }

@@ -377,9 +377,8 @@ page {
   line-height: 64rpx;
   font-size: 26rpx;
   font-weight: 700;
-  /* background: linear-gradient(155deg, var(--color-primary), #c7ea92); */
-  background: #6FCF97f2;
-  color: #fff;
+  background: linear-gradient(160deg, rgb(102 230 156 / 26%), rgba(86, 204, 242, 0.04));
+  color: var(--color-primary-dark);
   border: none;
   border-radius: 14rpx;
   padding: 0;
