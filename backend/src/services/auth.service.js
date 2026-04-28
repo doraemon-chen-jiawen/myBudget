@@ -7,6 +7,15 @@ function normalizeOptionalString(v) {
 }
 
 /**
+ * Generate a random DiceBear Adventurer cartoon avatar URL.
+ * @returns {string} SVG avatar URL with a random seed
+ */
+function generateDefaultAvatar() {
+  const seed = Math.random().toString(36).substring(2, 10);
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
+}
+
+/**
  * Service: login by wechat_openid.
  */
 async function loginByOpenid(payload) {
@@ -16,7 +25,7 @@ async function loginByOpenid(payload) {
   }
 
   const nickname = normalizeOptionalString(payload?.nickname);
-  const avatarUrl = normalizeOptionalString(payload?.avatarUrl);
+  const avatarUrl = normalizeOptionalString(payload?.avatarUrl) || generateDefaultAvatar();
   const phone = normalizeOptionalString(payload?.phone);
 
   return upsertByWechatOpenid({
@@ -52,6 +61,7 @@ async function loginByUsernamePassword(payload) {
     userId: user.id,
     username: user.username,
     nickname: user.nickname,
+    avatar_url: user.avatar_url || generateDefaultAvatar(),
     token: generateToken(user.id)
   };
 }
@@ -90,13 +100,15 @@ async function registerUser(payload) {
   const user = await createUserWithPassword({
     username: trimmedUsername,
     passwordHash,
-    nickname: nickname?.trim() || trimmedUsername
+    nickname: nickname?.trim() || trimmedUsername,
+    avatarUrl: generateDefaultAvatar()
   });
 
   return {
     userId: user.id,
     username: user.username,
     nickname: user.nickname,
+    avatar_url: user.avatar_url,
     token: generateToken(user.id)
   };
 }

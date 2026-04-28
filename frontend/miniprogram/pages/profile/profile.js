@@ -1,3 +1,5 @@
+const { request } = require("../../utils/request");
+
 Page({
   data: {
     userInfo: {
@@ -6,19 +8,33 @@ Page({
     },
     userId: null,
     greeting: "Hi，你好 👋",
-    stats: {
-      days: "--",
-      count: "--",
-      saved: "--"
-    }
+    dailyQuote: ""
   },
 
   onLoad() {
     this.loadUserInfo();
+    this.loadDailyQuote();
   },
 
   onShow() {
     this.loadUserInfo();
+  },
+
+  async loadDailyQuote() {
+    try {
+      console.log("Fetching daily quote...");
+      const data = await request({
+        url: "/home/daily-quote",
+        method: "GET",
+        showLoading: false,
+        silent: false
+      });
+      console.log("Daily quote response:", data);
+      this.setData({ dailyQuote: data.quote || "今天的努力，是明天自由的基石" });
+    } catch (e) {
+      console.error("Failed to load daily quote:", e);
+      this.setData({ dailyQuote: "今天的努力，是明天自由的基石" });
+    }
   },
 
   loadUserInfo() {
@@ -58,6 +74,7 @@ Page({
         if (res.confirm) {
           wx.removeStorageSync("userId");
           wx.removeStorageSync("token");
+          wx.removeStorageSync("loginTime");
 
           wx.showToast({
             title: "已退出登录",
@@ -81,9 +98,27 @@ Page({
     });
   },
 
+  onNavigateToFamily() {
+    wx.navigateTo({
+      url: "/pages/family/family"
+    });
+  },
+
   onNavigateToBudget() {
     wx.navigateTo({
       url: "/pages/budget/budget"
+    });
+  },
+
+  onNavigateToRecords() {
+    wx.navigateTo({
+      url: "/pages/records/records"
+    });
+  },
+
+  onNavigateToStatistics() {
+    wx.navigateTo({
+      url: "/pages/statistics/statistics"
     });
   }
 });

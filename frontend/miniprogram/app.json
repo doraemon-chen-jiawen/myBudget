@@ -4,7 +4,10 @@
     "pages/register/register",
     "pages/index/index",
     "pages/budget/budget",
-    "pages/profile/profile"
+    "pages/records/records",
+    "pages/statistics/statistics",
+    "pages/profile/profile",
+    "pages/family/family"
   ],
   "window": {
     "navigationBarTitleText": "myBudget",

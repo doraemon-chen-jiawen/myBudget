@@ -1,9 +1,23 @@
 const { request } = require("../../utils/request");
 
+const LOGIN_VALIDITY_MS = 7 * 24 * 60 * 60 * 1000;
+
 Page({
   data: {
     username: "",
     password: ""
+  },
+
+  onShow() {
+    if (this.isLoggedIn()) {
+      wx.switchTab({ url: "/pages/index/index" });
+    }
+  },
+
+  isLoggedIn() {
+    const loginTime = wx.getStorageSync("loginTime");
+    if (!loginTime) return false;
+    return Date.now() - loginTime < LOGIN_VALIDITY_MS;
   },
 
   onUsernameInput(e) {
@@ -39,6 +53,7 @@ Page({
 
       wx.setStorageSync("userId", data.userId);
       wx.setStorageSync("token", data.token);
+      wx.setStorageSync("loginTime", Date.now());
 
       wx.showToast({
         title: "登录成功",

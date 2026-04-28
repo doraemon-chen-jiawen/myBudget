@@ -37,10 +37,10 @@ async function createUser({ wechatOpenid, nickname, avatarUrl, phone }) {
   return findById(id);
 }
 
-async function createUserWithPassword({ username, passwordHash, nickname }) {
+async function createUserWithPassword({ username, passwordHash, nickname, avatarUrl }) {
   const [result] = await pool.query(
-    "INSERT INTO users (username, password_hash, nickname) VALUES (?, ?, ?)",
-    [username, passwordHash, nickname || ""]
+    "INSERT INTO users (username, password_hash, nickname, avatar_url) VALUES (?, ?, ?, ?)",
+    [username, passwordHash, nickname || "", avatarUrl || null]
   );
   const id = result.insertId;
   return findById(id);
@@ -52,6 +52,14 @@ async function updateUserPartial(id, { nickname, avatarUrl, phone }) {
     [nickname || "", avatarUrl || null, phone || null, id]
   );
   return findById(id);
+}
+
+async function updateUserAvatar(userId, avatarUrl) {
+  await pool.query(
+    "UPDATE users SET avatar_url = ? WHERE id = ?",
+    [avatarUrl, userId]
+  );
+  return findById(userId);
 }
 
 async function findById(id) {
@@ -73,11 +81,32 @@ async function upsertByWechatOpenid({ wechatOpenid, nickname, avatarUrl, phone }
   return updateUserPartial(existed.id, { nickname, avatarUrl, phone });
 }
 
+async function listUserFamilies(userId) {
+  const [rows] = await pool.query(
+    `SELECT
+      fg.id,
+      fg.name,
+      fg.description,
+      fg.owner_user_id,
+      fm.role,
+      fm.status
+    FROM family_members fm
+    INNER JOIN family_groups fg ON fm.family_group_id = fg.id
+    WHERE fm.user_id = ? AND fm.status = 'active'
+    ORDER BY fm.joined_at DESC`,
+    [userId]
+  );
+  return rows;
+}
+
 module.exports = {
   upsertByWechatOpenid,
   findByWechatOpenid,
   findByUsername,
   findByUsernameWithPassword,
-  createUserWithPassword
+  createUserWithPassword,
+  updateUserPartial,
+  updateUserAvatar,
+  listUserFamilies
 };
 

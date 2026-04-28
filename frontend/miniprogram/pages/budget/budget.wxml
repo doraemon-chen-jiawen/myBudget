@@ -2,7 +2,7 @@
   <view class="page-header">
     <view class="header-deco"></view>
     <view class="header-total">
-      <text class="total-label">{{currentTab === 'daily' ? '每日' : currentTab === 'monthly' ? '每月' : '理财'}}预算总额</text>
+      <text class="total-label">{{currentTab === 'daily' ? '每日' : currentTab === 'monthly' ? '每月' : currentTab === 'yearly' ? '年度' : '理财'}}预算总额</text>
       <view class="total-amount-row">
         <text class="total-currency">¥</text>
         <text class="total-amount">{{budgetTotal}}</text>
@@ -13,12 +13,15 @@
 
   <view class="tabs-container">
     <view class="tabs">
-      <view class="tabs-indicator" style="transform: translateX({{currentTab === 'daily' ? '0' : currentTab === 'monthly' ? '100%' : '200%'}})"></view>
+      <view class="tabs-indicator" style="transform: translateX({{currentTab === 'daily' ? '0' : currentTab === 'monthly' ? '100%' : currentTab === 'yearly' ? '200%' : '300%'}})"></view>
       <view class="tab {{currentTab === 'daily' ? 'tab--active' : ''}}" data-tab="daily" bindtap="onTabChange">
         每日预算
       </view>
       <view class="tab {{currentTab === 'monthly' ? 'tab--active' : ''}}" data-tab="monthly" bindtap="onTabChange">
         每月预算
+      </view>
+      <view class="tab {{currentTab === 'yearly' ? 'tab--active' : ''}}" data-tab="yearly" bindtap="onTabChange">
+        年度预算
       </view>
       <view class="tab {{currentTab === 'finance' ? 'tab--active' : ''}}" data-tab="finance" bindtap="onTabChange">
         理财预算

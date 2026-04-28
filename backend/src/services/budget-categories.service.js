@@ -1,5 +1,6 @@
 const AppError = require("../utils/app-error");
 const categoriesDao = require("../dao/budget-categories.dao");
+const hiddenCategoriesDao = require("../dao/user-hidden-categories.dao");
 
 const ALLOWED_PERIOD_TYPES = ["daily", "monthly", "finance_interest"];
 
@@ -69,9 +70,26 @@ async function update(id, userId, payload) {
 
   const category = await categoriesDao.findById(id);
   if (!category) throw new AppError(404, "E_NOT_FOUND", "Category not found");
-  if (category.is_system) {
-    throw new AppError(403, "E_FORBIDDEN", "System categories cannot be modified");
+
+  // 内置分类（user_id 为 NULL）：为用户创建副本
+  if (category.user_id === null) {
+    return create({
+      userId,
+      periodType: category.period_type,
+      categoryKey: `${category.category_key}_user_${userId}_${Date.now()}`,
+      label: payload.label || category.label,
+      icon: payload.icon || category.icon,
+      hint: payload.hint || category.hint,
+      color: payload.color || category.color,
+      bgColor: payload.bgColor || category.bg_color,
+      colorLight: payload.colorLight || category.color_light,
+      quickAmounts: payload.quickAmounts || category.quick_amounts,
+      defaultAmount: payload.defaultAmount !== undefined ? payload.defaultAmount : category.default_amount,
+      sortOrder: payload.sortOrder !== undefined ? payload.sortOrder : category.sort_order
+    });
   }
+
+  // 用户自定义分类：检查权限后更新
   if (category.user_id !== userId) {
     throw new AppError(403, "E_FORBIDDEN", "Cannot edit other user's category");
   }
@@ -87,9 +105,14 @@ async function remove(id, userId) {
 
   const category = await categoriesDao.findById(id);
   if (!category) throw new AppError(404, "E_NOT_FOUND", "Category not found");
-  if (category.is_system) {
-    throw new AppError(403, "E_FORBIDDEN", "System categories cannot be deleted");
+
+  // 内置分类（user_id 为 NULL）：标记为隐藏，不删除
+  if (category.user_id === null) {
+    await hiddenCategoriesDao.hideCategory(userId, id);
+    return true;
   }
+
+  // 用户自定义分类：检查权限后删除
   if (category.user_id !== userId) {
     throw new AppError(403, "E_FORBIDDEN", "Cannot delete other user's category");
   }

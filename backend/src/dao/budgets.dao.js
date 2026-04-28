@@ -17,6 +17,18 @@ function buildWhere(filters) {
     where.push("period_key = ?");
     params.push(filters.periodKey);
   }
+  if (filters.budgetDate) {
+    where.push("budget_date = ?");
+    params.push(filters.budgetDate);
+  }
+  if (filters.budgetMonth) {
+    where.push("budget_month = ?");
+    params.push(filters.budgetMonth);
+  }
+  if (filters.budgetYear) {
+    where.push("budget_year = ?");
+    params.push(filters.budgetYear);
+  }
 
   return { whereSql: where.join(" AND "), params };
 }
@@ -42,11 +54,11 @@ async function createBudget(payload) {
     INSERT INTO budgets (
       user_id, family_group_id,
       period_type, period_key,
-      budget_date, budget_month,
+      budget_date, budget_month, budget_year,
       account_id,
       planned_amount, planned_annual_rate, planned_principal_amount,
       note
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const params = [
     payload.userId,
@@ -55,6 +67,7 @@ async function createBudget(payload) {
     payload.periodKey,
     payload.budgetDate ?? null,
     payload.budgetMonth ?? null,
+    payload.budgetYear ?? null,
     payload.accountId ?? null,
     payload.plannedAmount ?? null,
     payload.plannedAnnualRate ?? null,
@@ -80,6 +93,7 @@ async function updateBudget(id, userId, payload) {
       period_key = ?,
       budget_date = ?,
       budget_month = ?,
+      budget_year = ?,
       account_id = ?,
       planned_amount = ?,
       planned_annual_rate = ?,
@@ -95,6 +109,7 @@ async function updateBudget(id, userId, payload) {
     payload.periodKey,
     payload.budgetDate ?? null,
     payload.budgetMonth ?? null,
+    payload.budgetYear ?? null,
     payload.accountId ?? null,
     payload.plannedAmount ?? null,
     payload.plannedAnnualRate ?? null,

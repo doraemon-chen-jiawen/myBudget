@@ -25,22 +25,10 @@
   <!-- Wave divider -->
   <view class="header-wave"></view>
 
-  <!-- Quick stats -->
-  <view class="stats-card">
-    <view class="stat-item">
-      <text class="stat-value">{{stats.days}}</text>
-      <text class="stat-label">记账天数</text>
-    </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item">
-      <text class="stat-value">{{stats.count}}</text>
-      <text class="stat-label">记账笔数</text>
-    </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item">
-      <text class="stat-value">{{stats.saved}}</text>
-      <text class="stat-label">本月结余</text>
-    </view>
+  <!-- Daily quote -->
+  <view class="quote-card">
+    <text class="quote-icon">💡</text>
+    <text class="quote-text">{{dailyQuote}}</text>
   </view>
 
   <!-- Menu: Features -->
@@ -60,7 +48,20 @@
         <text class="arrow-icon">›</text>
       </view>
 
-      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToRecords">
+        <view class="menu-left">
+          <view class="icon-box icon-records">
+            <text class="icon-emoji">📋</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">记账流水</text>
+            <text class="menu-subtitle">查看收支记录明细</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToStatistics">
         <view class="menu-left">
           <view class="icon-box icon-stats">
             <text class="icon-emoji">📊</text>
@@ -72,19 +73,6 @@
         </view>
         <text class="arrow-icon">›</text>
       </view>
-
-      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
-        <view class="menu-left">
-          <view class="icon-box icon-category">
-            <text class="icon-emoji">🏷️</text>
-          </view>
-          <view class="menu-text-wrap">
-            <text class="menu-title">分类管理</text>
-            <text class="menu-subtitle">自定义收支分类</text>
-          </view>
-        </view>
-        <text class="arrow-icon">›</text>
-      </view>
     </view>
   </view>
 
@@ -92,6 +80,19 @@
   <view class="menu-group">
     <text class="group-title">更多</text>
     <view class="menu-card">
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToFamily">
+        <view class="menu-left">
+          <view class="icon-box icon-family">
+            <text class="icon-emoji">👨‍👩‍👧‍👦</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">家庭管理</text>
+            <text class="menu-subtitle">管理家庭群组和成员</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+
       <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
         <view class="menu-left">
           <view class="icon-box icon-settings">

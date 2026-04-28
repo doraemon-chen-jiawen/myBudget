@@ -1,0 +1,201 @@
+<view class="container">
+<view class="tabs">
+<view
+  wx:for="{{tabs}}"
+  wx:key="key"
+  class="tab-item {{activeTabIndex === index ? 'active' : ''}}"
+  data-index="{{index}}"
+  data-key="{{item.key}}"
+  bindtap="onTabChange">
+  {{item.label}}
+</view>
+</view>
+
+<view class="tab-content" wx:if="{{currentTab === 'groups'}}">
+  <view class="family-selector" wx:if="{{userFamilies.length > 1}}">
+    <view
+      wx:for="{{userFamilies}}"
+      wx:key="id"
+      class="family-option {{selectedFamilyIndex === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onSelectFamily">
+      {{item.name}}
+    </view>
+  </view>
+
+  <view class="family-info" wx:if="{{userFamilies.length > 0}}">
+    <view class="family-name">
+      {{userFamilies[selectedFamilyIndex].name}}
+    </view>
+    <view class="family-description">
+      {{userFamilies[selectedFamilyIndex].description || '暂无描述'}}
+    </view>
+    <view class="family-role">
+      角色: {{userFamilies[selectedFamilyIndex].role === 'owner' ? '群主' : '成员'}}
+    </view>
+  </view>
+
+  <view class="members-section" wx:if="{{userFamilies.length > 0}}">
+    <view class="section-title">成员列表 ({{familyMembers.length}})</view>
+
+    <view class="member-list">
+      <view class="member-item" wx:for="{{familyMembers}}" wx:key="id">
+        <view class="member-avatar">
+          {{item.nickname.substring(0, 1)}}
+        </view>
+        <view class="member-info">
+          <view class="member-name">{{item.nickname}}</view>
+          <view class="member-role">
+            {{item.role === 'owner' ? '群主' : '成员'}}
+            <text wx:if="{{item.isCurrentUser}}" class="current-user-tag">（我）</text>
+          </view>
+        </view>
+        <view
+          class="member-action"
+          wx:if="{{!item.isCurrentUser && item.role !== 'owner'}}"
+          data-user-id="{{item.user_id}}"
+          data-nickname="{{item.nickname}}"
+          bindtap="onRemoveMember">
+          移除
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{userFamilies.length === 0}}">
+    <view class="empty-icon">👨‍👩‍👧‍👦</view>
+    <view class="empty-text">暂无家庭群组</view>
+    <button class="create-btn" bindtap="onCreateFamily">创建家庭群组</button>
+  </view>
+</view>
+
+<view class="tab-content" wx:if="{{currentTab === 'invite'}}">
+  <view class="empty-state" wx:if="{{userFamilies.length === 0}}">
+    <view class="empty-text">请先创建或加入家庭群组</view>
+  </view>
+
+  <view class="invite-section" wx:else>
+    <view class="section-header">
+      <text class="section-title">邀请码列表</text>
+      <button class="create-btn-small" bindtap="onOpenCreateModal">新建邀请码</button>
+    </view>
+
+    <view class="invitation-list" wx:if="{{invitationCodes.length > 0}}">
+      <view class="invitation-item" wx:for="{{invitationCodes}}" wx:key="id">
+        <view class="invitation-code" data-code="{{item.code}}" bindtap="onCopyCode">
+          {{item.code}}
+          <text class="copy-hint">（点击复制）</text>
+        </view>
+        <view class="invitation-info">
+          已使用: {{item.used_count}}/{{item.max_uses}}
+        </view>
+        <view class="invitation-action"
+          data-id="{{item.id}}"
+          data-code="{{item.code}}"
+          bindtap="onDeleteCode">
+          删除
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:else>
+      <view class="empty-text">暂无邀请码</view>
+    </view>
+
+    <button class="share-btn" bindtap="onShareInvitation">分享给好友</button>
+  </view>
+</view>
+
+<view class="tab-content" wx:if="{{currentTab === 'join'}}">
+  <view class="join-section">
+    <view class="section-title">输入邀请码加入家庭</view>
+
+    <view class="input-group">
+      <input
+        class="code-input"
+        type="text"
+        placeholder="请输入8位邀请码"
+        maxlength="8"
+        value="{{joinForm.code}}"
+        bindinput="onJoinFormInput" />
+      <button class="validate-btn" bindtap="onValidateCode">验证</button>
+    </view>
+
+    <view class="join-preview" wx:if="{{joinPreview}}">
+      <view class="preview-title">家庭信息预览</view>
+      <view class="preview-item">
+        <text class="preview-label">家庭名称:</text>
+        <text class="preview-value">{{joinPreview.familyGroup.name}}</text>
+      </view>
+      <view class="preview-item">
+        <text class="preview-label">群主:</text>
+        <text class="preview-value">{{joinPreview.familyGroup.owner_nickname}}</text>
+      </view>
+      <view class="preview-item">
+        <text class="preview-label">描述:</text>
+        <text class="preview-value">{{joinPreview.familyGroup.description || '暂无描述'}}</text>
+      </view>
+      <button class="join-btn" bindtap="onAcceptInvite">确认加入</button>
+    </view>
+  </view>
+</view>
+
+<view class="modal" wx:if="{{showCreateModal}}">
+  <view class="modal-mask" bindtap="onCloseCreateModal"></view>
+  <view class="modal-content">
+    <view class="modal-title">创建邀请码</view>
+
+    <view class="form-group">
+      <text class="form-label">最大使用次数</text>
+      <input
+        class="form-input"
+        type="number"
+        placeholder="默认10次"
+        value="{{createForm.maxUses}}"
+        data-field="maxUses"
+        bindinput="onCreateFormInput" />
+    </view>
+
+    <view class="modal-actions">
+      <button class="modal-btn cancel" bindtap="onCloseCreateModal">取消</button>
+      <button class="modal-btn confirm" bindtap="onCreateInvitationCode">创建</button>
+    </view>
+  </view>
+</view>
+
+<view class="modal" wx:if="{{showCreateFamilyModal}}">
+  <view class="modal-mask" bindtap="onCloseCreateFamilyModal"></view>
+  <view class="modal-content">
+    <view class="modal-title">创建家庭群组</view>
+
+    <view class="form-group">
+      <text class="form-label">家庭名称</text>
+      <input
+        class="form-input"
+        type="text"
+        placeholder="请输入家庭名称"
+        maxlength="20"
+        value="{{createFamilyForm.name}}"
+        data-field="name"
+        bindinput="onCreateFamilyFormInput" />
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">描述（选填）</text>
+      <input
+        class="form-input"
+        type="text"
+        placeholder="请输入描述"
+        maxlength="100"
+        value="{{createFamilyForm.description}}"
+        data-field="description"
+        bindinput="onCreateFamilyFormInput" />
+    </view>
+
+    <view class="modal-actions">
+      <button class="modal-btn cancel" bindtap="onCloseCreateFamilyModal">取消</button>
+      <button class="modal-btn confirm" bindtap="onCreateFamilyConfirm">创建</button>
+    </view>
+  </view>
+</view>
+</view>

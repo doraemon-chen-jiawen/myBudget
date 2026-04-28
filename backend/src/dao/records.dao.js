@@ -127,10 +127,23 @@ async function deleteRecord(id, userId) {
   return result.affectedRows > 0;
 }
 
+async function getUserStats(userId) {
+  const [rows] = await pool.query(
+    `SELECT
+       COUNT(*) AS total_count,
+       COUNT(DISTINCT record_date) AS total_days
+     FROM records
+     WHERE user_id = ?`,
+    [userId]
+  );
+  return rows[0] || { total_count: 0, total_days: 0 };
+}
+
 module.exports = {
   listRecords,
   createRecord,
   updateRecord,
-  deleteRecord
+  deleteRecord,
+  getUserStats
 };
 

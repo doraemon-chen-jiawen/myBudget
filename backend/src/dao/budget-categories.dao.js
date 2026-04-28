@@ -1,8 +1,17 @@
 const { pool } = require("../config/db");
+const hiddenCategoriesDao = require("./user-hidden-categories.dao");
 
 async function listCategories({ userId, periodType }) {
+  const hiddenIds = await hiddenCategoriesDao.getHiddenCategoryIds(userId);
+  const hiddenIdsStr = hiddenIds.map(() => "?").join(",");
+
   const where = ["(user_id IS NULL OR user_id = ?)", "is_active = 1"];
   const params = [userId];
+
+  if (hiddenIds.length > 0) {
+    where.push(`id NOT IN (${hiddenIdsStr})`);
+    params.push(...hiddenIds);
+  }
 
   if (periodType) {
     where.push("period_type = ?");

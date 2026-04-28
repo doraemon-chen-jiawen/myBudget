@@ -1,0 +1,315 @@
+/* Records Page */
+.records-page {
+  min-height: 100vh;
+  background: #F8FAFC;
+  padding-bottom: 160rpx;
+}
+
+/* ===== Month Nav ===== */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx 0 20rpx;
+  background: #ffffff;
+}
+
+.month-arrow {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #64748B;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.month-arrow-active {
+  background: #f0f2f5;
+}
+
+.month-text {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1E293B;
+  margin: 0 40rpx;
+  min-width: 200rpx;
+  text-align: center;
+}
+
+/* ===== Type Tabs ===== */
+.type-tabs {
+  display: flex;
+  padding: 16rpx 32rpx 24rpx;
+  background: #ffffff;
+  gap: 16rpx;
+}
+
+.type-tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #64748B;
+  border-radius: 1000rpx;
+  background: #F1F5F9;
+  transition: all 0.2s;
+}
+
+.type-tab-active {
+  background: #6FCF97;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.type-tab-hover {
+  opacity: 0.85;
+}
+
+/* ===== Date Groups ===== */
+.records-list {
+  padding: 0 24rpx;
+}
+
+.date-group {
+  margin-bottom: 24rpx;
+  animation: fade-up 0.4s ease-out both;
+}
+
+.date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 12rpx 12rpx;
+}
+
+.date-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.date-summary {
+  display: flex;
+  gap: 20rpx;
+}
+
+.date-expense {
+  font-size: 22rpx;
+  color: #FF6B6B;
+}
+
+.date-income {
+  font-size: 22rpx;
+  color: #6FCF97;
+}
+
+/* ===== Record Cards ===== */
+.record-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 28rpx;
+}
+
+.record-item + .record-item {
+  border-top: 1rpx solid #f5f7fa;
+}
+
+.record-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.record-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.icon-expense {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.icon-income {
+  background: rgba(111, 207, 151, 0.1);
+}
+
+.record-icon-text {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.icon-expense .record-icon-text {
+  color: #FF6B6B;
+}
+
+.icon-income .record-icon-text {
+  color: #6FCF97;
+}
+
+.record-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.record-category {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1E293B;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-note {
+  font-size: 22rpx;
+  color: #94A3B8;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-amount {
+  font-size: 30rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.amount-expense {
+  color: #FF6B6B;
+}
+
+.amount-income {
+  color: #6FCF97;
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0;
+  animation: fade-in 0.5s ease-out both;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #64748B;
+  margin-bottom: 8rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #94A3B8;
+}
+
+/* ===== Bottom Summary ===== */
+.bottom-summary {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.04);
+  z-index: 10;
+}
+
+.summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 22rpx;
+  color: #94A3B8;
+  margin-bottom: 4rpx;
+}
+
+.summary-value {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.summary-value.expense {
+  color: #FF6B6B;
+}
+
+.summary-value.income {
+  color: #6FCF97;
+}
+
+.summary-divider {
+  width: 1rpx;
+  height: 56rpx;
+  background: #e2e8f0;
+}
+
+/* ===== Loading ===== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 250, 252, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.loading-spinner {
+  width: 64rpx;
+  height: 64rpx;
+  border: 6rpx solid #e2e8f0;
+  border-top-color: #6FCF97;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===== Animations ===== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

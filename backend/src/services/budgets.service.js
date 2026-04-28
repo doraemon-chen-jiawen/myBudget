@@ -4,7 +4,7 @@ const budgetsDao = require("../dao/budgets.dao");
 const categoriesDao = require("../dao/budget-categories.dao");
 
 function validatePeriodType(periodType) {
-  const allowed = ["daily", "monthly", "finance_interest"];
+  const allowed = ["daily", "monthly", "finance_interest", "yearly"];
   if (!allowed.includes(periodType)) throw new AppError(400, "E_BAD_REQUEST", "Invalid periodType");
 }
 
@@ -49,6 +49,18 @@ function normalizeDaoPayload(userId, payload) {
     requireNumber({ plannedAmount: nPlannedAmount }, "plannedAmount");
   }
 
+  if (periodType === "yearly") {
+    if (!payload.budgetYear) {
+      throw new AppError(400, "E_BAD_REQUEST", "yearly requires budgetYear");
+    }
+    finalPeriodKey = finalPeriodKey || `yearly_${payload.budgetYear}`;
+    if (plannedAmount === undefined || plannedAmount === null) {
+      throw new AppError(400, "E_BAD_REQUEST", "yearly requires plannedAmount");
+    }
+    const nPlannedAmount = Number(plannedAmount);
+    requireNumber({ plannedAmount: nPlannedAmount }, "plannedAmount");
+  }
+
   if (periodType === "finance_interest") {
     if (!finalBudgetMonth) throw new AppError(400, "E_BAD_REQUEST", "finance_interest requires budgetMonth");
     finalPeriodKey = finalPeriodKey || finalBudgetMonth;
@@ -74,9 +86,10 @@ function normalizeDaoPayload(userId, payload) {
     periodType,
     periodKey: finalPeriodKey,
     budgetDate: periodType === "daily" ? finalBudgetDate : null,
-    budgetMonth: periodType === "daily" ? null : finalBudgetMonth,
+    budgetMonth: (periodType === "monthly" || periodType === "finance_interest") ? finalBudgetMonth : null,
+    budgetYear: periodType === "yearly" ? payload.budgetYear : null,
     accountId: periodType === "finance_interest" ? accountId : null,
-    plannedAmount: periodType === "finance_interest" ? null : Number(plannedAmount),
+    plannedAmount: (periodType === "daily" || periodType === "monthly" || periodType === "yearly") ? Number(plannedAmount) : null,
     plannedAnnualRate: periodType === "finance_interest" ? plannedAnnualRate : null,
     plannedPrincipalAmount: periodType === "finance_interest" ? plannedPrincipalAmount : null,
     note: note ?? null
@@ -138,6 +151,7 @@ async function ensureDefaultBudgets(userId, periodType) {
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const yearKey = `${now.getFullYear()}`;
 
   const created = [];
   for (const cat of categories) {
@@ -151,7 +165,8 @@ async function ensureDefaultBudgets(userId, periodType) {
       periodKey,
       plannedAmount: Number(cat.default_amount),
       budgetDate: periodType === "daily" ? today : null,
-      budgetMonth: periodType !== "daily" ? monthKey : null,
+      budgetMonth: (periodType === "monthly" || periodType === "finance_interest") ? monthKey : null,
+      budgetYear: periodType === "yearly" ? yearKey : null,
       accountId: null,
       plannedAnnualRate: null,
       plannedPrincipalAmount: null,

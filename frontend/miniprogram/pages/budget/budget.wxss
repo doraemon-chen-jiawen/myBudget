@@ -81,7 +81,7 @@
 .total-amount {
   font-size: 64rpx;
   font-weight: 800;
-  color: var(--color-text-main);
+  color: var(--color-primary-deepdark);
   letter-spacing: -1rpx;
 }
 
@@ -115,11 +115,11 @@
   position: absolute;
   top: 8rpx;
   left: 8rpx;
-  width: calc((100% - 32rpx) / 3);
+  width: calc((100% - 20rpx) / 4);
   height: calc(100% - 16rpx);
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   border-radius: var(--radius-pill);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); */
   z-index: 0;
   box-shadow: 0 4rpx 16rpx rgba(111, 207, 151, 0.3);
 }
@@ -378,7 +378,7 @@
   font-size: 32rpx;
   font-weight: 600;
   padding: 0;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); */
 }
 
 .btn::after {
@@ -446,7 +446,7 @@
   box-shadow: 0 32rpx 100rpx rgba(0, 0, 0, 0.2);
   overflow: hidden;
   transform: scale(0.92) translateY(30rpx);
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); */
 }
 
 .modal--show .modal-content {

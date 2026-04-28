@@ -3,6 +3,7 @@ page {
   /* 核心色彩 - 温暖而柔和 */
   --color-primary: #6FCF97;
   --color-primary-dark: #5AB87A;
+  --color-primary-deepdark: #107939;
   --color-accent: #56CCF2;
   --color-accent-dark: #42B4D6;
   --color-warm: #FFB38A;

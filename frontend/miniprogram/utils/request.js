@@ -24,10 +24,17 @@ function request(options = {}) {
   }
 
   return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync("token");
+    const header = {};
+    if (token) {
+      header["Authorization"] = `Bearer ${token}`;
+    }
+
     wx.request({
       url: `${app.globalData.apiBaseUrl}/api${url}`,
       method,
       data,
+      header,
       success: (res) => {
         if (res.statusCode >= 200 && res.statusCode < 300 && res.data?.success) {
           resolve(res.data.data);

@@ -4,7 +4,7 @@ Page({
   data: {
     currentTab: "daily",
     // All categories grouped by period_type (from API)
-    categories: { daily: [], monthly: [], finance_interest: [] },
+    categories: { daily: [], monthly: [], finance_interest: [], yearly: [] },
     // Current tab's category list (for template wx:for)
     budgetCategories: [],
     // Current tab's budget values (for template input binding)
@@ -16,6 +16,7 @@ Page({
     dailyBudgets: {},
     monthlyBudgets: {},
     financeBudgets: {},
+    yearlyBudgets: {},
     budgetIds: {},
     loading: false,
     // Edit modal
@@ -51,7 +52,7 @@ Page({
         silent: true
       });
 
-      const categories = { daily: [], monthly: [], finance_interest: [] };
+      const categories = { daily: [], monthly: [], finance_interest: [], yearly: [] };
       allCategories.forEach(cat => {
         if (typeof cat.quick_amounts === "string") {
           cat.quick_amounts = JSON.parse(cat.quick_amounts);
@@ -86,24 +87,30 @@ Page({
   },
 
   _updateVisibleData() {
-    const { currentTab, categories, dailyBudgets, monthlyBudgets, financeBudgets } = this.data;
+    const { currentTab, categories, dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets } = this.data;
     const periodType = currentTab === "finance" ? "finance_interest" : currentTab;
     const list = categories[periodType] || [];
-    const values = currentTab === "daily" ? dailyBudgets :
-                   currentTab === "monthly" ? monthlyBudgets : financeBudgets;
+    const values =
+      currentTab === "daily" ? dailyBudgets :
+      currentTab === "monthly" ? monthlyBudgets :
+      currentTab === "yearly" ? yearlyBudgets : financeBudgets;
 
     const now = new Date();
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const validKeys = (cats) => new Set(cats.map(c => c.key));
     const dailyKeys = validKeys(categories.daily || []);
     const monthlyKeys = validKeys(categories.monthly || []);
+    const yearlyKeys = validKeys(categories.yearly || []);
     const dailySum = this._sumByKeys(dailyBudgets, dailyKeys);
     const monthlySum = this._sumByKeys(monthlyBudgets, monthlyKeys);
+    const yearlySum = this._sumByKeys(yearlyBudgets, yearlyKeys);
     const tabSum = this._sumByKeys(values, validKeys(list));
     let budgetTotal = tabSum;
 
     if (currentTab === "monthly") {
       budgetTotal = monthlySum + dailySum * daysInMonth;
+    } else if (currentTab === "yearly") {
+      budgetTotal = yearlySum;
     }
 
     const fmt = (n) => n % 1 === 0 ? String(n) : n.toFixed(2);
@@ -114,6 +121,7 @@ Page({
       budgetTotal: fmt(budgetTotal),
       dailyTotal: fmt(dailySum),
       monthlyTotal: fmt(monthlySum),
+      yearlyTotal: fmt(yearlySum),
       daysInMonth
     });
   },
@@ -140,8 +148,8 @@ Page({
     try {
       this.setData({ loading: true });
 
-      // Auto-create defaults for daily and monthly
-      for (const pt of ["daily", "monthly"]) {
+      // Auto-create defaults for daily, monthly and yearly
+      for (const pt of ["daily", "monthly", "yearly"]) {
         try {
           await request({
             url: "/budgets/initialize-defaults",
@@ -157,15 +165,17 @@ Page({
       const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
       const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-      const [dailyData, monthlyData, financeData] = await Promise.all([
+      const [dailyData, monthlyData, financeData, yearlyData] = await Promise.all([
         request({ url: "/budgets", method: "GET", data: { userId, periodType: "daily" } }),
         request({ url: "/budgets", method: "GET", data: { userId, periodType: "monthly" } }),
-        request({ url: "/budgets", method: "GET", data: { userId, periodType: "finance_interest" } })
+        request({ url: "/budgets", method: "GET", data: { userId, periodType: "finance_interest" } }),
+        request({ url: "/budgets", method: "GET", data: { userId, periodType: "yearly" } })
       ]);
 
       const dailyBudgets = {};
       const monthlyBudgets = {};
       const financeBudgets = {};
+      const yearlyBudgets = {};
       const budgetIds = {};
 
       const parseKey = (pk) => {
@@ -189,9 +199,14 @@ Page({
         financeBudgets[key] = item.planned_amount;
         budgetIds[`finance_${key}`] = item.id;
       });
+      yearlyData.forEach(item => {
+        const key = parseKey(item.period_key);
+        yearlyBudgets[key] = item.planned_amount;
+        budgetIds[`yearly_${key}`] = item.id;
+      });
 
       this.setData({
-        dailyBudgets, monthlyBudgets, financeBudgets, budgetIds, loading: false
+        dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds, loading: false
       });
       this._updateVisibleData();
     } catch (error) {
@@ -215,7 +230,11 @@ Page({
   onBudgetInput(e) {
     const { category, type } = e.currentTarget.dataset;
     const value = e.detail.value;
-    const budgets = type === "daily" ? "dailyBudgets" : type === "monthly" ? "monthlyBudgets" : "financeBudgets";
+    const budgets =
+      type === "daily" ? "dailyBudgets" :
+      type === "monthly" ? "monthlyBudgets" :
+      type === "yearly" ? "yearlyBudgets" :
+      "financeBudgets";
     this.setData({
       [`${budgets}.${category}`]: value,
       [`currentBudgetValues.${category}`]: value
@@ -226,7 +245,11 @@ Page({
   onQuickAmount(e) {
     const { category, amount } = e.currentTarget.dataset;
     const type = this.data.currentTab;
-    const budgets = type === "daily" ? "dailyBudgets" : type === "monthly" ? "monthlyBudgets" : "financeBudgets";
+    const budgets =
+      type === "daily" ? "dailyBudgets" :
+      type === "monthly" ? "monthlyBudgets" :
+      type === "yearly" ? "yearlyBudgets" :
+      "financeBudgets";
     this.setData({
       [`${budgets}.${category}`]: amount,
       [`currentBudgetValues.${category}`]: amount
@@ -236,22 +259,31 @@ Page({
   },
 
   _refreshTotal() {
-    const { currentTab, currentBudgetValues, dailyBudgets, monthlyBudgets, budgetCategories, categories, daysInMonth } = this.data;
+    const { currentTab, currentBudgetValues, dailyBudgets, monthlyBudgets, yearlyBudgets, budgetCategories, categories, daysInMonth } = this.data;
     const validKeys = (cats) => new Set(cats.map(c => c.key));
     const currentKeys = validKeys(budgetCategories);
     const tabSum = this._sumByKeys(currentBudgetValues, currentKeys);
     let total = tabSum;
     let dailySum = 0;
     let monthlySum = 0;
+    let yearlySum = 0;
     if (currentTab === "daily") {
       dailySum = tabSum;
     } else if (currentTab === "monthly") {
       dailySum = this._sumByKeys(dailyBudgets, validKeys(categories.daily || []));
       monthlySum = this._sumByKeys(monthlyBudgets, validKeys(categories.monthly || []));
       total = monthlySum + dailySum * daysInMonth;
+    } else if (currentTab === "yearly") {
+      yearlySum = tabSum;
+      total = yearlySum;
     }
     const fmt = (n) => n % 1 === 0 ? String(n) : n.toFixed(2);
-    this.setData({ budgetTotal: fmt(total), dailyTotal: fmt(dailySum), monthlyTotal: fmt(monthlySum) });
+    this.setData({
+      budgetTotal: fmt(total),
+      dailyTotal: fmt(dailySum),
+      monthlyTotal: fmt(monthlySum),
+      yearlyTotal: fmt(yearlySum)
+    });
   },
 
   // ---------- Edit ----------
@@ -311,6 +343,7 @@ Page({
         const now = new Date();
         const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
         const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const yearKey = `${now.getFullYear()}`;
 
         if (budgetId) {
           await request({
@@ -322,7 +355,8 @@ Page({
               periodKey: budgetKey,
               plannedAmount: Number(editForm.amount),
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: currentTab !== "daily" ? monthKey : undefined
+              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetYear: currentTab === "yearly" ? yearKey : undefined
             }
           });
         } else {
@@ -334,7 +368,8 @@ Page({
               periodType: currentTab,
               periodKey: `${currentTab}_${editItem.key}`,
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: currentTab !== "daily" ? monthKey : undefined,
+              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetYear: currentTab === "yearly" ? yearKey : undefined,
               plannedAmount: Number(editForm.amount)
             }
           });
@@ -366,6 +401,7 @@ Page({
       try {
         this.setData({ loading: true });
 
+        // Delete budget record
         if (budgetId) {
           await request({
             url: `/budgets/${budgetId}`,
@@ -374,8 +410,8 @@ Page({
           });
         }
 
-        // Also delete custom category from backend
-        if (catItem && catItem.isCustom && catItem.id) {
+        // Delete category from backend (including system categories)
+        if (catItem && catItem.id) {
           await request({
             url: `/budget-categories/${catItem.id}`,
             method: "DELETE",
@@ -396,7 +432,7 @@ Page({
 
     wx.showModal({
       title: "确认删除",
-      content: "确定要删除此预算吗？",
+      content: "确定要删除此预算和分类吗？",
       confirmColor: "#FF6B6B",
       success: async (res) => { if (res.confirm) await doDelete(); }
     });
@@ -454,6 +490,7 @@ Page({
         const now = new Date();
         const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
         const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const yearKey = `${now.getFullYear()}`;
 
         await request({
           url: "/budgets",
@@ -463,7 +500,8 @@ Page({
             periodType,
             periodKey: `${periodType}_${newCat.category_key}`,
             budgetDate: periodType === "daily" ? today : undefined,
-            budgetMonth: periodType !== "daily" ? monthKey : undefined,
+            budgetMonth: (periodType === "monthly" || periodType === "finance_interest") ? monthKey : undefined,
+            budgetYear: periodType === "yearly" ? yearKey : undefined,
             plannedAmount: Number(addForm.amount)
           }
         });
@@ -491,10 +529,11 @@ Page({
       return;
     }
 
-    const { currentTab, dailyBudgets, monthlyBudgets, financeBudgets, budgetIds } = this.data;
+    const { currentTab, dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds } = this.data;
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const yearKey = `${now.getFullYear()}`;
 
     try {
       this.setData({ loading: true });
@@ -502,6 +541,7 @@ Page({
       let budgets, periodType;
       if (currentTab === "daily") { budgets = dailyBudgets; periodType = "daily"; }
       else if (currentTab === "monthly") { budgets = monthlyBudgets; periodType = "monthly"; }
+      else if (currentTab === "yearly") { budgets = yearlyBudgets; periodType = "yearly"; }
       else { budgets = financeBudgets; periodType = "finance_interest"; }
 
       for (const [key, amount] of Object.entries(budgets)) {
@@ -522,7 +562,8 @@ Page({
               userId, periodType, periodKey,
               plannedAmount: Number(amount),
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: currentTab !== "daily" ? monthKey : undefined
+              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetYear: currentTab === "yearly" ? yearKey : undefined
             }
           });
         } else {
@@ -532,7 +573,8 @@ Page({
             data: {
               userId, periodType, periodKey,
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: currentTab !== "daily" ? monthKey : undefined,
+              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetYear: currentTab === "yearly" ? yearKey : undefined,
               plannedAmount: Number(amount)
             }
           });
@@ -562,8 +604,11 @@ Page({
       success: (res) => {
         if (res.confirm) {
           const { currentTab } = this.data;
-          const budgetsKey = currentTab === "daily" ? "dailyBudgets" :
-                            currentTab === "monthly" ? "monthlyBudgets" : "financeBudgets";
+          const budgetsKey =
+            currentTab === "daily" ? "dailyBudgets" :
+            currentTab === "monthly" ? "monthlyBudgets" :
+            currentTab === "yearly" ? "yearlyBudgets" :
+            "financeBudgets";
           this.setData({ [budgetsKey]: {}, currentBudgetValues: {} });
           wx.vibrateShort({ type: "light" });
           wx.showToast({ title: "已重置", icon: "success" });

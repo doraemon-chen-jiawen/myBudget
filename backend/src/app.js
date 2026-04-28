@@ -16,6 +16,9 @@ const autoFillRoute = require("./routes/auto-fill");
 const familyRoute = require("./routes/family");
 const homeRoute = require("./routes/home");
 const budgetCategoriesRoute = require("./routes/budget-categories");
+const statisticsRoute = require("./routes/statistics");
+const invitationRoute = require("./routes/invitation");
+const familyManagementRoute = require("./routes/family-management");
 const { notFoundHandler, errorHandler } = require("./middleware/error-handler");
 
 const app = express();
@@ -54,6 +57,9 @@ app.use("/api/family-groups", familyGroupsRoute);
 app.use("/api/auto-fill", autoFillRoute);
 app.use("/api/family", familyRoute);
 app.use("/api/home", homeRoute);
+app.use("/api/statistics", statisticsRoute);
+app.use("/api/invitations", invitationRoute);
+app.use("/api/family-management", familyManagementRoute);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
