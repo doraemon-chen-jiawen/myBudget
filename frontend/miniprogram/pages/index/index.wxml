@@ -1,59 +1,54 @@
 <view class="page">
-  <view class="decor-dot decor-dot-1"></view>
-  <view class="decor-dot decor-dot-2"></view>
-  <view class="decor-line decor-line-1"></view>
-
-  <view class="date-hero">
-    <view class="decor-circle decor-circle-1"></view>
-    <view class="decor-circle decor-circle-2"></view>
-    <text class="date-day">{{day}}</text>
-    <view class="date-meta">
-      <text class="date-month">{{month}}月</text>
-      <text class="date-dot">·</text>
-      <text class="date-weekday">{{weekday}}</text>
+  <!-- 顶部：日剩余预算 + 日期 + 毒鸡汤 -->
+  <view class="hero">
+    <view class="hero-main">
+      <text class="hero-label">日剩余预算</text>
+      <text class="hero-amount">¥{{remainTotal}}</text>
+      <text class="hero-date">{{month}}月{{day}}日 {{weekday}}</text>
     </view>
+    <text class="hero-quote {{quoteType}}">{{dailyQuote}}</text>
   </view>
 
   <!-- 家庭选择器 -->
-<view class="family-selector" wx:if="{{familyGroups.length > 0}}">
-  <view class="family-selector-header" bindtap="onToggleFamilySelector">
-    <text class="family-label">当前家庭:</text>
-    <text class="family-name">{{selectedFamilyIndex >= 0 ? familyGroups[selectedFamilyIndex].name : '个人记账'}}</text>
-    <text class="selector-arrow">{{showFamilySelector ? '▲' : '▼'}}</text>
+  <view class="family-selector" wx:if="{{familyGroups.length > 0}}">
+    <view class="family-selector-header" bindtap="onToggleFamilySelector">
+      <text class="family-label">当前家庭:</text>
+      <text class="family-name">{{selectedFamilyIndex >= 0 ? familyGroups[selectedFamilyIndex].name : '个人记账'}}</text>
+      <text class="selector-arrow">{{showFamilySelector ? '▲' : '▼'}}</text>
+    </view>
+    <view class="family-dropdown" wx:if="{{showFamilySelector}}">
+      <view class="family-option {{selectedFamilyIndex === -1 ? 'active' : ''}}" data-index="-1" bindtap="onSwitchFamily">
+        个人记账
+      </view>
+      <view wx:for="{{familyGroups}}" wx:key="id" class="family-option {{selectedFamilyIndex === index ? 'active' : ''}}" data-index="{{index}}" bindtap="onSwitchFamily">
+        {{item.name}}
+      </view>
+    </view>
   </view>
-  <view class="family-dropdown" wx:if="{{showFamilySelector}}">
-    <view class="family-option {{selectedFamilyIndex === -1 ? 'active' : ''}}" data-index="-1" bindtap="onSwitchFamily">
-      个人记账
-    </view>
-    <view wx:for="{{familyGroups}}" wx:key="id" class="family-option {{selectedFamilyIndex === index ? 'active' : ''}}" data-index="{{index}}" bindtap="onSwitchFamily">
-      {{item.name}}
-    </view>
-  </view>
-</view>
 
-<view class="summary-card">
-    <view class="card-header">
-      <text class="card-title">今日概览</text>
-      <image class="card-icon" mode="aspectFit" />
-    </view>
-
-    <view class="budget-display">
-      <text class="budget-label">今日预算</text>
-      <text class="budget-amount">¥{{budgetTotal}}</text>
-    </view>
-
+  <!-- 统计卡片 -->
+  <view class="summary-card">
     <view class="stats-row">
       <view class="stat-item">
-        <text class="stat-label">实际花销</text>
+        <text class="stat-label">今日预算</text>
+        <text class="stat-value">¥{{budgetTotal}}</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-label">今日花销</text>
         <text class="stat-value expense">¥{{actualTotal}}</text>
       </view>
       <view class="stat-item">
-        <text class="stat-label">剩余预算</text>
-        <text class="stat-value remain">¥{{remainTotal}}</text>
+        <text class="stat-label">本月消费</text>
+        <text class="stat-value expense">¥{{monthActualTotal}}</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-label">本月剩余</text>
+        <text class="stat-value">¥{{monthRemainTotal}}</text>
       </view>
     </view>
   </view>
 
+  <!-- 快捷记账 -->
   <view class="quick-section">
     <view class="section-header">
       <text class="section-title">快捷记账</text>
@@ -81,28 +76,6 @@
           data-amount="{{item.currentAmount}}"
           bindtap="onTapQuickRecord"
         >记一笔</button>
-      </view>
-    </view>
-  </view>
-
-  <!-- 月度统计 -->
-  <view class="month-section">
-    <view class="section-header">
-      <text class="section-title">月度统计</text>
-      <text class="section-sub">{{month}}月</text>
-    </view>
-    <view class="month-card">
-      <view class="month-row">
-        <text class="month-label">月度预算</text>
-        <text class="month-value budget">¥{{monthBudgetTotal}}</text>
-      </view>
-      <view class="month-row">
-        <text class="month-label">实际花销</text>
-        <text class="month-value expense">¥{{monthActualTotal}}</text>
-      </view>
-      <view class="month-row">
-        <text class="month-label">剩余预算</text>
-        <text class="month-value remain">¥{{monthRemainTotal}}</text>
       </view>
     </view>
   </view>

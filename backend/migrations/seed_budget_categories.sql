@@ -2,7 +2,7 @@
 -- Seed: system default budget categories (12 rows)
 -- ============================================================
 
-INSERT INTO budget_categories
+INSERT IGNORE INTO budget_categories
   (user_id, period_type, category_key, label, icon, hint, color, bg_color, color_light, quick_amounts, default_amount, sort_order, is_system)
 VALUES
   -- Daily (4)

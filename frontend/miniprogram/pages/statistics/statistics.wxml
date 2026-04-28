@@ -76,11 +76,11 @@
           </view>
           <text class="cat-label">{{item.categoryLabel}}</text>
         </view>
-        <text class="cat-percent" style="color: {{item.percent >= 100 ? '#FF6B6B' : item.percent >= 80 ? '#FFB38A' : '#6FCF97'}};">{{item.percent}}%</text>
+        <text class="cat-percent" style="color: {{item.percent > 100 ? '#FF6B6B' : item.percent >= 80 ? '#5B8FF9' : '#6FCF97'}};">{{item.percent}}%</text>
       </view>
       <view class="cat-progress">
         <view class="cat-progress-track">
-          <view class="cat-progress-fill" style="width: {{item.percent > 100 ? 100 : item.percent}}%; background: {{item.percent >= 100 ? '#FF6B6B' : item.percent >= 80 ? '#FFB38A' : '#6FCF97'}};"></view>
+          <view class="cat-progress-fill" style="width: {{item.percent > 100 ? 100 : item.percent}}%; background: {{item.percent > 100 ? '#FF6B6B' : item.percent >= 80 ? '#5B8FF9' : '#6FCF97'}};"></view>
         </view>
       </view>
       <view class="cat-amounts">

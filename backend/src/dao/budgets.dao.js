@@ -1,8 +1,17 @@
 const { pool } = require("../config/db");
 
 function buildWhere(filters) {
-  const where = ["user_id = ?"];
-  const params = [filters.userId];
+  const where = [];
+  const params = [];
+
+  if (filters.userIds && filters.userIds.length > 0) {
+    const placeholders = filters.userIds.map(() => "?").join(",");
+    where.push(`user_id IN (${placeholders})`);
+    params.push(...filters.userIds);
+  } else {
+    where.push("user_id = ?");
+    params.push(filters.userId);
+  }
 
   if (filters.familyGroupId !== undefined && filters.familyGroupId !== null) {
     where.push("family_group_id = ?");

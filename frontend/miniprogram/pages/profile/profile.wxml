@@ -7,16 +7,16 @@
 
     <view class="user-info">
       <view class="avatar-wrapper" bindtap="onChooseAvatar">
- <view class="avatar-ring"></view>
- <view class="avatar">
- <image wx:if="{{userInfo.avatarUrl}}" class="avatar-img" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
- <text wx:else class="avatar-text">{{userInfo.avatarAnimal || '🦊'}}</text>
- </view>
- <view class="avatar-edit-badge">
- <text class="avatar-edit-icon">📷</text>
- </view>
- </view>
- <view class="user-detail">
+        <view class="avatar-ring"></view>
+        <view class="avatar">
+          <image wx:if="{{userInfo.avatarUrl}}" class="avatar-img" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+          <text wx:else class="avatar-text">{{userInfo.avatarAnimal || '🦊'}}</text>
+        </view>
+        <view class="avatar-edit-badge">
+          <text class="avatar-edit-icon">📷</text>
+        </view>
+      </view>
+      <view class="user-detail">
         <text class="greeting">{{greeting}}</text>
         <text class="nickname">{{userInfo.nickname}}</text>
         <view class="user-id-badge">

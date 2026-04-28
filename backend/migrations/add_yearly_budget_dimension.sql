@@ -67,7 +67,7 @@ CHECK (
 );
 
 -- 插入年度预算的系统默认分类
-INSERT INTO budget_categories (
+INSERT IGNORE INTO budget_categories (
   user_id, period_type, category_key, label, icon, hint,
   color, bg_color, color_light, quick_amounts,
   default_amount, sort_order, is_system, is_active

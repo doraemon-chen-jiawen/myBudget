@@ -106,7 +106,7 @@ Page({
       const ratio = summary.budgetTotal > 0 ? summary.actualTotal / summary.budgetTotal : 0;
       const overallPercent = summary.budgetTotal > 0 ? (ratio * 100).toFixed(1) : 0;
       const progressWidth = Math.min(ratio * 100, 100);
-      const progressColor = ratio >= 1 ? "#FF6B6B" : ratio >= 0.8 ? "#FFB38A" : "#6FCF97";
+      const progressColor = ratio > 1 ? "#FF6B6B" : ratio >= 0.8 ? "#5B8FF9" : "#6FCF97";
 
       this.setData({
         summary,
@@ -168,8 +168,8 @@ Page({
   },
 
   getPercentColor(percent) {
-    if (percent >= 100) return "#FF6B6B";
-    if (percent >= 80) return "#FFB38A";
+    if (percent > 100) return "#FF6B6B";
+    if (percent >= 80) return "#5B8FF9";
     return "#6FCF97";
   }
 });

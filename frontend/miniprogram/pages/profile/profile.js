@@ -1,10 +1,17 @@
 const { request } = require("../../utils/request");
 
+const ANIMAL_EMOJIS = ['🦊', '🐶', '🐱', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦄', '🐝', '🦋'];
+
+function randomAnimal() {
+  return ANIMAL_EMOJIS[Math.floor(Math.random() * ANIMAL_EMOJIS.length)];
+}
+
 Page({
   data: {
     userInfo: {
       nickname: "",
-      avatarUrl: ""
+      avatarUrl: "",
+      avatarAnimal: randomAnimal()
     },
     userId: null,
     greeting: "Hi，你好 👋",
@@ -41,6 +48,8 @@ Page({
     const userId = wx.getStorageSync("userId");
     const token = wx.getStorageSync("token");
     const hour = new Date().getHours();
+    const storedAvatarAnimal = wx.getStorageSync("avatarAnimal");
+    const storedAvatarUrl = wx.getStorageSync("avatarUrl");
     let greeting = "Hi，你好 👋";
 
     if (hour >= 5 && hour < 12) {
@@ -60,7 +69,32 @@ Page({
       greeting,
       userInfo: {
         nickname: userId ? "用户" + userId : "未登录",
-        avatarUrl: ""
+        avatarUrl: storedAvatarUrl || "",
+        avatarAnimal: storedAvatarAnimal || randomAnimal()
+      }
+    });
+  },
+
+  onChooseAvatar() {
+    wx.chooseImage({
+      count: 1,
+      sizeType: ["compressed"],
+      sourceType: ["album", "camera"],
+      success: (res) => {
+        const tempFilePath = res.tempFilePaths[0];
+        this.setData({
+          "userInfo.avatarUrl": tempFilePath,
+          "userInfo.avatarAnimal": ""
+        });
+        wx.setStorageSync("avatarUrl", tempFilePath);
+        wx.setStorageSync("avatarAnimal", "");
+        wx.showToast({
+          title: "头像已更新",
+          icon: "success"
+        });
+      },
+      fail: () => {
+        // user cancelled, do nothing
       }
     });
   },
@@ -75,6 +109,8 @@ Page({
           wx.removeStorageSync("userId");
           wx.removeStorageSync("token");
           wx.removeStorageSync("loginTime");
+          wx.removeStorageSync("avatarUrl");
+          wx.removeStorageSync("avatarAnimal");
 
           wx.showToast({
             title: "已退出登录",

@@ -24,7 +24,9 @@ Page({
     familyGroups: [],
     selectedFamilyIndex: -1,
     showFamilySelector: false,
-    loading: false
+    loading: false,
+    dailyQuote: "",
+    quoteType: "" // "good" or "bad"
   },
 
   onLoad() {
@@ -142,6 +144,8 @@ Page({
           return item;
         })
       });
+
+      this.updateQuote();
     } catch (error) {
       // 错误提示已在 request 内统一处理，此处不再重复 toast。
     }
@@ -221,5 +225,37 @@ Page({
     });
     this.setData({ quickItems: items });
     wx.vibrateShort({ type: "light" });
+  },
+
+  updateQuote() {
+    const { remainTotal, monthRemainTotal } = this.data;
+    const isUnderBudget = remainTotal >= 0 && monthRemainTotal >= 0;
+
+    const goodQuotes = [
+      "省钱是通往自由的第一步",
+      "克制是一种高级的自由",
+      "今天省下的每一分，都是未来的底气",
+      "自律即富裕",
+      "钱包鼓了，腰杆就直了",
+      "省到就是赚到",
+      "克制消费，是一种优雅的自律"
+    ];
+
+    const badQuotes = [
+      "钱不是万能的，但没钱是万万不能的",
+      "你花的不是钱，是未来的自由",
+      "别让钱包为冲动买单",
+      "今天买买买，明天吃土土",
+      "每一笔多余的花销，都是明天的后悔",
+      "手痒痒的时候，看看余额",
+      "省钱不丢人，月光才尴尬"
+    ];
+
+    const pool = isUnderBudget ? goodQuotes : badQuotes;
+    const dayIndex = new Date().getDate() % pool.length;
+    this.setData({
+      dailyQuote: pool[dayIndex],
+      quoteType: isUnderBudget ? "good" : "bad"
+    });
   }
 });

@@ -79,15 +79,11 @@ async function getOverview({ userId, dimension, date, familyGroupId, memberUserI
   const range = getDateRange(dimension, baseDate);
   const userIds = await resolveUserIds({ userId, familyGroupId, memberUserId });
 
-  const dayKey = range.start;
-  const monthKey = range.start.substring(0, 7);
-  const yearKey = String(new Date(range.start).getFullYear());
-
   const [actualRows, dailyBudgets, monthlyBudgets, yearlyBudgets, categories] = await Promise.all([
     statisticsDao.getActualByCategory({ userIds, dateFrom: range.start, dateTo: range.end }),
-    budgetsDao.listBudgets({ userId, periodType: "daily", budgetDate: dayKey }),
-    budgetsDao.listBudgets({ userId, periodType: "monthly", budgetMonth: monthKey }),
-    budgetsDao.listBudgets({ userId, periodType: "yearly", budgetYear: yearKey }),
+    budgetsDao.listBudgets({ userIds, periodType: "daily" }),
+    budgetsDao.listBudgets({ userIds, periodType: "monthly" }),
+    budgetsDao.listBudgets({ userIds, periodType: "yearly" }),
     budgetCategoriesDao.listCategories({ userId, periodType: null })
   ]);
 
@@ -109,8 +105,11 @@ async function getOverview({ userId, dimension, date, familyGroupId, memberUserI
   const daysInRange = dimension === "day" ? 1 :
     Math.round((new Date(range.end) - new Date(range.start)) / 86400000) + 1;
 
+  const monthsInRange = dimension === "year" ? 12 :
+    (dimension === "month" || dimension === "week") ? 1 : 0;
+
   for (const b of dailyBudgets) {
-    const catKey = b.period_key || "";
+    const catKey = (b.period_key || "").replace(/^daily_/, "");
     const cat = categoryMap[catKey];
     if (cat) {
       budgetMap[cat.label] = (budgetMap[cat.label] || 0) + Number(b.planned_amount || 0) * daysInRange;
@@ -120,15 +119,15 @@ async function getOverview({ userId, dimension, date, familyGroupId, memberUserI
   for (const b of monthlyBudgets) {
     const catKey = (b.period_key || "").replace(/^monthly_/, "");
     const cat = categoryMap[catKey];
-    if (cat) {
-      budgetMap[cat.label] = (budgetMap[cat.label] || 0) + Number(b.planned_amount || 0);
+    if (cat && monthsInRange > 0) {
+      budgetMap[cat.label] = (budgetMap[cat.label] || 0) + Number(b.planned_amount || 0) * monthsInRange;
     }
   }
 
   for (const b of yearlyBudgets) {
     const catKey = (b.period_key || "").replace(/^yearly_/, "");
     const cat = categoryMap[catKey];
-    if (cat) {
+    if (cat && dimension === "year") {
       budgetMap[cat.label] = (budgetMap[cat.label] || 0) + Number(b.planned_amount || 0);
     }
   }
