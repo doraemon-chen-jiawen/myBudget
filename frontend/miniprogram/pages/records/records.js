@@ -14,7 +14,9 @@ Page({
     groupedRecords: [],
     totalIncome: 0,
     totalExpense: 0,
-    loading: false
+    loading: false,
+    touchStartX: 0,
+    currentTouchedId: null
   },
 
   onLoad() {
@@ -73,7 +75,9 @@ Page({
         amount: Number(r.amount || 0).toFixed(2),
         type: r.record_type || r.recordType,
         note: r.note || "",
-        source: r.source || ""
+        source: r.source || "",
+        sourceReference: r.source_reference || null,
+        recordDate: date
       };
       map[date].items.push(item);
       if (item.type === "expense") {
@@ -82,8 +86,40 @@ Page({
         map[date].dayIncome += Number(r.amount || 0);
       }
     }
+
     const list = Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
+
+    // 重新排序每个日期组，让撤回记录紧跟在原记录后面，并标记被撤回记录
     for (const g of list) {
+      const reorderedItems = [];
+      const usedIds = new Set();
+
+      for (const item of g.items) {
+        if (usedIds.has(item.id)) continue;
+
+        if (item.source === "retract" && item.sourceReference) {
+          // 撤回记录
+          const originalItem = g.items.find(i => i.id === item.sourceReference);
+          if (originalItem && !usedIds.has(originalItem.id)) {
+            // 添加原记录，标记为已撤回
+            reorderedItems.push({ ...originalItem, isRetracted: true });
+            usedIds.add(originalItem.id);
+
+            // 添加撤回记录，标记为撤回类型
+            reorderedItems.push({ ...item, isRetract: true });
+            usedIds.add(item.id);
+          }
+        }
+      }
+
+      // 添加未处理的记录
+      for (const item of g.items) {
+        if (!usedIds.has(item.id)) {
+          reorderedItems.push(item);
+        }
+      }
+
+      g.items = reorderedItems;
       g.dayExpense = g.dayExpense.toFixed(2);
       g.dayIncome = g.dayIncome.toFixed(2);
     }
@@ -130,5 +166,107 @@ Page({
     const newMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     this.setData({ currentMonth: newMonth });
     this.loadRecords();
+  },
+
+  onTouchStart(e) {
+    const touch = e.touches[0];
+    this.setData({
+      touchStartX: touch.clientX,
+      currentTouchedId: e.currentTarget.dataset.id
+    });
+  },
+
+  onTouchMove(e) {
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - this.data.touchStartX;
+    const recordId = e.currentTarget.dataset.id;
+
+    if (deltaX < -50) {
+      this.updateSwipedState(recordId, true);
+    } else if (deltaX > 50) {
+      this.updateSwipedState(recordId, false);
+    }
+  },
+
+  onTouchEnd(e) {
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - this.data.touchStartX;
+    const recordId = e.currentTarget.dataset.id;
+
+    if (deltaX < -80) {
+      this.updateSwipedState(recordId, true);
+    } else if (deltaX > 20) {
+      this.updateSwipedState(recordId, false);
+    } else {
+      this.updateSwipedState(recordId, false);
+    }
+  },
+
+  updateSwipedState(recordId, swiped) {
+    const groupedRecords = this.data.groupedRecords.map(group => {
+      const items = group.items.map(item => {
+        if (item.id === recordId) {
+          // 如果是已撤回的记录或撤回记录，不允许滑动
+          if (item.isRetracted || item.isRetract) {
+            return { ...item, swiped: false };
+          }
+          return { ...item, swiped };
+        }
+        return { ...item, swiped: false };
+      });
+      return { ...group, items };
+    });
+
+    this.setData({ groupedRecords });
+  },
+
+  async onRetract(e) {
+    const { id, amount, type, category, note, recordDate } = e.currentTarget.dataset;
+    const userId = wx.getStorageSync("userId");
+
+    wx.showModal({
+      title: "确认撤回",
+      content: `将新增一条对冲记录：¥${amount}`,
+      confirmText: "确认",
+      cancelText: "取消",
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            const originalAmount = parseFloat(amount);
+            const retractAmount = -originalAmount;
+
+            await request({
+              url: "/records",
+              method: "POST",
+              data: {
+                userId,
+                amount: retractAmount,
+                recordType: type,
+                category: "其他",
+                note: "撤回记录",
+                source: "retract",
+                sourceReference: id, // 记录被撤回的原始记录ID
+                recordDate: recordDate // 使用原记录的日期
+              }
+            });
+
+            wx.showToast({
+              title: "撤回成功",
+              icon: "success"
+            });
+
+            this.updateSwipedState(id, false);
+            this.loadRecords();
+          } catch (err) {
+            wx.showToast({
+              title: "撤回失败",
+              icon: "error"
+            });
+          }
+        } else {
+          this.updateSwipedState(id, false);
+        }
+      }
+    });
   }
 });

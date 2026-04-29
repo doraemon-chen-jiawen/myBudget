@@ -1,3 +1,12 @@
+-- ============================================================
+-- Migration: Add yearly budget support
+-- 添加年度预算支持的结构变更
+-- 执行完成后，运行 seed_budget_categories.sql 来插入年度分类数据
+-- ============================================================
+
+-- 临时禁用外键检查
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- 添加 'yearly' 到 budget_categories.period_type ENUM
 ALTER TABLE budget_categories
 MODIFY COLUMN period_type ENUM('daily','monthly','finance_interest','yearly') NOT NULL;
@@ -10,7 +19,7 @@ MODIFY COLUMN period_type ENUM('daily','monthly','finance_interest','yearly') NO
 ALTER TABLE budgets
 MODIFY COLUMN period_key VARCHAR(64) NOT NULL;
 
--- 添加 budget_year 字段用于年度预算（如果已存在则删除重新添加）
+-- 添加 budget_year 字段用于年度预算
 SET @column_exists = (
   SELECT COUNT(*)
   FROM INFORMATION_SCHEMA.COLUMNS
@@ -31,9 +40,24 @@ ALTER TABLE budgets
 ADD COLUMN budget_year CHAR(4) DEFAULT NULL COMMENT '年度预算年份 (YYYY)' AFTER budget_month;
 
 -- 更新 CHECK 约束以支持 yearly
-ALTER TABLE budgets
-DROP CONSTRAINT ck_budgets_period_fields;
+-- 先删除旧约束（如果存在）- MySQL兼容语法
+SET @constraint_exists = (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'budgets'
+    AND CONSTRAINT_NAME = 'ck_budgets_period_fields'
+);
 
+SET @sql = IF(@constraint_exists > 0,
+  'ALTER TABLE budgets DROP CHECK ck_budgets_period_fields',
+  'SELECT "Constraint does not exist, skipping drop" AS message'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 添加新的 CHECK 约束
 ALTER TABLE budgets
 ADD CONSTRAINT ck_budgets_period_fields
 CHECK (
@@ -66,17 +90,11 @@ CHECK (
   )
 );
 
--- 插入年度预算的系统默认分类
-INSERT IGNORE INTO budget_categories (
-  user_id, period_type, category_key, label, icon, hint,
-  color, bg_color, color_light, quick_amounts,
-  default_amount, sort_order, is_system, is_active
-) VALUES
-  -- 旅游
-  (NULL, 'yearly', 'travel', '旅游', '✈️', '年度旅游支出',
-   '#2E86DE', 'rgba(46,134,222,0.1)', 'rgba(46,134,222,0.3)',
-   '["1000","2000","3000"]', 2000.00, 1, 1, 1),
-  -- 孝敬父母
-  (NULL, 'yearly', 'parents', '孝敬父母', '👨‍👩‍👧', '给父母的孝心',
-   '#FF6B6B', 'rgba(255,107,107,0.1)', 'rgba(255,107,107,0.3)',
-   '["500","1000","2000"]', 1000.00, 2, 1, 1);
+-- 恢复外键检查
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- 执行说明：
+-- 1. 先执行本文件进行结构变更
+-- 2. 再执行 seed_budget_categories.sql 插入年度分类数据
+-- ============================================================

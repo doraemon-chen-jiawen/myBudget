@@ -130,11 +130,11 @@
 .greeting {
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 6rpx;
+  margin-bottom: 8rpx;
 }
 
 .nickname {
-  font-size: 40rpx;
+  font-size: 46rpx;
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 14rpx;
@@ -169,7 +169,7 @@
   margin: -40rpx 32rpx 0;
   background: #ffffff;
   border-radius: 28rpx;
-  padding: 32rpx 40rpx;
+  padding: 22rpx 40rpx;
   box-shadow: 0 8rpx 40rpx rgba(111, 207, 151, 0.1), 0 2rpx 8rpx rgba(0, 0, 0, 0.02);
   position: relative;
   z-index: 3;
@@ -274,6 +274,10 @@
 
 .icon-records {
   background: rgba(255, 179, 138, 0.15);
+}
+
+.icon-family {
+  background: #ffbb8a26;
 }
 
 .icon-settings {

@@ -25,7 +25,14 @@ Page({
     editForm: { label: "", amount: "" },
     // Add modal
     showAddModal: false,
-    addForm: { key: "", label: "", amount: "" }
+    addForm: { key: "", label: "", amount: "" },
+    // Pending delete operations per tab
+    pendingDeletes: {
+      daily: {},
+      monthly: {},
+      finance: {},
+      yearly: {}
+    }
   },
 
   onLoad() {
@@ -53,20 +60,30 @@ Page({
       });
 
       const categories = { daily: [], monthly: [], finance_interest: [], yearly: [] };
-      allCategories.forEach(cat => {
-        if (typeof cat.quick_amounts === "string") {
-          cat.quick_amounts = JSON.parse(cat.quick_amounts);
+      allCategories.forEach((cat, index) => {
+        try {
+
+          if (typeof cat.quick_amounts === "string") {
+            cat.quick_amounts = JSON.parse(cat.quick_amounts);
+          }
+        } catch (e) {
+          cat.quick_amounts = [];
         }
+
         const pt = cat.period_type;
+
         if (categories[pt]) {
-          categories[pt].push(this._mapCategory(cat));
+          const mapped = this._mapCategory(cat);
+          categories[pt].push(mapped);
+        } else {
+          console.warn(`【分类加载】未知的 period_type: ${pt}, 分类:`, cat);
         }
       });
 
       this.setData({ categories });
       this._updateVisibleData();
     } catch (error) {
-      console.error("加载分类失败:", error);
+      console.error("【分类加载】加载分类失败:", error);
     }
   },
 
@@ -95,6 +112,11 @@ Page({
       currentTab === "monthly" ? monthlyBudgets :
       currentTab === "yearly" ? yearlyBudgets : financeBudgets;
 
+    console.log('【更新可见数据】currentTab:', currentTab);
+    console.log('【更新可见数据】periodType:', periodType);
+    console.log('【更新可见数据】list (budgetCategories):', list);
+    console.log('【更新可见数据】list 长度:', list.length);
+
     const now = new Date();
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const validKeys = (cats) => new Set(cats.map(c => c.key));
@@ -115,6 +137,9 @@ Page({
 
     const fmt = (n) => n % 1 === 0 ? String(n) : n.toFixed(2);
 
+    console.log('【更新可见数据】即将设置 budgetCategories:', list);
+    console.log('【更新可见数据】即将设置 currentBudgetValues:', values);
+
     this.setData({
       budgetCategories: list,
       currentBudgetValues: { ...values },
@@ -124,6 +149,8 @@ Page({
       yearlyTotal: fmt(yearlySum),
       daysInMonth
     });
+
+    console.log('【更新可见数据】设置完成');
   },
 
   _sumByKeys(values, keySet) {
@@ -206,7 +233,9 @@ Page({
       });
 
       this.setData({
-        dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds, loading: false
+        dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds,
+        loading: false,
+        pendingDeletes: { daily: {}, monthly: {}, finance: {}, yearly: {} }
       });
       this._updateVisibleData();
     } catch (error) {
@@ -390,51 +419,45 @@ Page({
 
   // ---------- Delete ----------
 
-  async onDeleteBudget(e) {
+  onDeleteBudget(e) {
     const { category } = e.currentTarget.dataset;
     const { currentTab, budgetIds, budgetCategories } = this.data;
     const budgetKey = `${currentTab}_${category}`;
     const budgetId = budgetIds[budgetKey];
     const catItem = budgetCategories.find(c => c.key === category);
 
-    const doDelete = async () => {
-      try {
-        this.setData({ loading: true });
-
-        // Delete budget record
-        if (budgetId) {
-          await request({
-            url: `/budgets/${budgetId}`,
-            method: "DELETE",
-            data: { userId: Number(wx.getStorageSync("userId")) }
-          });
-        }
-
-        // Delete category from backend (including system categories)
-        if (catItem && catItem.id) {
-          await request({
-            url: `/budget-categories/${catItem.id}`,
-            method: "DELETE",
-            data: { userId: Number(wx.getStorageSync("userId")) }
-          });
-        }
-
-        this.setData({ loading: false });
-        wx.showToast({ title: "删除成功", icon: "success" });
-        this.loadCategories();
-        this.loadBudgets();
-      } catch (error) {
-        console.error("删除失败:", error);
-        this.setData({ loading: false });
-        wx.showToast({ title: "删除失败", icon: "none" });
-      }
-    };
-
     wx.showModal({
       title: "确认删除",
-      content: "确定要删除此预算和分类吗？",
+      content: "删除后将保存时生效，确定要删除此预算和分类吗？",
       confirmColor: "#FF6B6B",
-      success: async (res) => { if (res.confirm) await doDelete(); }
+      success: (res) => {
+        if (res.confirm) {
+          // Add to pending deletes for current tab
+          const pendingDeletes = this.data.pendingDeletes || {};
+          pendingDeletes[currentTab] = pendingDeletes[currentTab] || {};
+          pendingDeletes[currentTab][category] = {
+            categoryId: catItem?.id,
+            budgetId: budgetId
+          };
+
+          // Clear budget value locally
+          const budgetsKey =
+            currentTab === "daily" ? "dailyBudgets" :
+            currentTab === "monthly" ? "monthlyBudgets" :
+            currentTab === "yearly" ? "yearlyBudgets" :
+            "financeBudgets";
+
+          this.setData({
+            pendingDeletes,
+            [`${budgetsKey}.${category}`]: "",
+            [`currentBudgetValues.${category}`]: ""
+          });
+
+          this._refreshTotal();
+          wx.vibrateShort({ type: "light" });
+          wx.showToast({ title: "已标记删除，点击保存生效", icon: "none", duration: 2000 });
+        }
+      }
     });
   },
 
@@ -529,7 +552,7 @@ Page({
       return;
     }
 
-    const { currentTab, dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds } = this.data;
+    const { currentTab, dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds, pendingDeletes } = this.data;
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -538,6 +561,38 @@ Page({
     try {
       this.setData({ loading: true });
 
+      // First, execute pending deletes for current tab only
+      const currentPendingDeletes = pendingDeletes[currentTab] || {};
+      for (const [key, deleteInfo] of Object.entries(currentPendingDeletes)) {
+        if (deleteInfo.budgetId) {
+          try {
+            await request({
+              url: `/budgets/${deleteInfo.budgetId}`,
+              method: "DELETE",
+              data: { userId }
+            });
+          } catch (error) {
+            console.error("删除预算失败:", key, error);
+          }
+        }
+        if (deleteInfo.categoryId) {
+          try {
+            await request({
+              url: `/budget-categories/${deleteInfo.categoryId}`,
+              method: "DELETE",
+              data: { userId }
+            });
+          } catch (error) {
+            console.error("删除分类失败:", key, error);
+          }
+        }
+      }
+
+      // Clear pending deletes for current tab after processing
+      const newPendingDeletes = { ...pendingDeletes };
+      delete newPendingDeletes[currentTab];
+
+      // Then save/update budget values
       let budgets, periodType;
       if (currentTab === "daily") { budgets = dailyBudgets; periodType = "daily"; }
       else if (currentTab === "monthly") { budgets = monthlyBudgets; periodType = "monthly"; }
@@ -581,9 +636,10 @@ Page({
         }
       }
 
-      this.setData({ loading: false });
+      this.setData({ loading: false, pendingDeletes: newPendingDeletes });
       wx.vibrateShort({ type: "heavy" });
       wx.showToast({ title: "预算已保存", icon: "success", duration: 2000 });
+      this.loadCategories();
       this.loadBudgets();
     } catch (error) {
       console.error("保存失败:", error);
@@ -597,19 +653,25 @@ Page({
   onResetBudgets() {
     wx.showModal({
       title: "确认重置",
-      content: "确定要清空当前分类下的所有预算金额吗？",
+      content: "确定要清空当前分类下的所有预算金额吗？已标记的删除也会被取消。",
       confirmText: "确定重置",
       cancelText: "取消",
       confirmColor: "#6FCF97",
       success: (res) => {
         if (res.confirm) {
-          const { currentTab } = this.data;
+          const { currentTab, pendingDeletes } = this.data;
           const budgetsKey =
             currentTab === "daily" ? "dailyBudgets" :
             currentTab === "monthly" ? "monthlyBudgets" :
             currentTab === "yearly" ? "yearlyBudgets" :
             "financeBudgets";
-          this.setData({ [budgetsKey]: {}, currentBudgetValues: {} });
+
+          // Clear pending deletes for current tab only
+          const newPendingDeletes = { ...pendingDeletes };
+          delete newPendingDeletes[currentTab];
+
+          this.setData({ [budgetsKey]: {}, currentBudgetValues: {}, pendingDeletes: newPendingDeletes });
+          this._refreshTotal();
           wx.vibrateShort({ type: "light" });
           wx.showToast({ title: "已重置", icon: "success" });
         }

@@ -146,6 +146,7 @@
   padding: 0 28rpx;
   position: relative;
   z-index: 1;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .budget-item {
@@ -178,6 +179,22 @@
 .budget-item:active {
   transform: scale(0.985);
   box-shadow: 0 2rpx 12rpx rgba(30, 41, 59, 0.04);
+}
+
+.budget-item--pending-delete {
+  opacity: 0.6;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-card),
+    var(--color-card) 20rpx,
+    rgba(255, 255, 255, 0.95) 20rpx,
+    rgba(255, 255, 255, 0.95) 40rpx
+  );
+}
+
+.budget-item--pending-delete::before {
+  background: var(--color-danger) !important;
+  opacity: 0.5 !important;
 }
 
 .budget-item:focus-within {
@@ -265,11 +282,27 @@
   color: var(--color-text-hint);
 }
 
+.pending-delete-tag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  margin-top: 8rpx;
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  font-size: 20rpx;
+  border-radius: 8rpx;
+  font-weight: 600;
+}
+
 /* Budget input area */
 .budget-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.budget-input-wrapper--disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .currency-symbol {

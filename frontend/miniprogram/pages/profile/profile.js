@@ -15,41 +15,22 @@ Page({
     },
     userId: null,
     greeting: "Hi，你好 👋",
-    dailyQuote: ""
+    streakDays: 0
   },
 
   onLoad() {
     this.loadUserInfo();
-    this.loadDailyQuote();
   },
 
   onShow() {
     this.loadUserInfo();
   },
 
-  async loadDailyQuote() {
-    try {
-      console.log("Fetching daily quote...");
-      const data = await request({
-        url: "/home/daily-quote",
-        method: "GET",
-        showLoading: false,
-        silent: false
-      });
-      console.log("Daily quote response:", data);
-      this.setData({ dailyQuote: data.quote || "今天的努力，是明天自由的基石" });
-    } catch (e) {
-      console.error("Failed to load daily quote:", e);
-      this.setData({ dailyQuote: "今天的努力，是明天自由的基石" });
-    }
-  },
-
   loadUserInfo() {
     const userId = wx.getStorageSync("userId");
     const token = wx.getStorageSync("token");
     const hour = new Date().getHours();
-    const storedAvatarAnimal = wx.getStorageSync("avatarAnimal");
-    const storedAvatarUrl = wx.getStorageSync("avatarUrl");
+    const userInfo = wx.getStorageSync("userInfo");
     let greeting = "Hi，你好 👋";
 
     if (hour >= 5 && hour < 12) {
@@ -64,13 +45,24 @@ Page({
       greeting = "Hi，夜深了 💤";
     }
 
+    // Calculate streak days
+    const firstRecordDate = wx.getStorageSync("firstRecordDate");
+    let streakDays = 0;
+    if (firstRecordDate) {
+      const first = new Date(firstRecordDate);
+      const now = new Date();
+      const diffTime = Math.abs(now - first);
+      streakDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
     this.setData({
       userId,
       greeting,
+      streakDays,
       userInfo: {
-        nickname: userId ? "用户" + userId : "未登录",
-        avatarUrl: storedAvatarUrl || "",
-        avatarAnimal: storedAvatarAnimal || randomAnimal()
+        nickname: userId ? userInfo.nickname : "未登录",
+        avatarUrl: userInfo.avatar_url || "",
+        avatarAnimal: randomAnimal()
       }
     });
   },

@@ -7,13 +7,13 @@ function validateRecordType(type) {
   if (!allowed.includes(type)) throw new AppError(400, "E_BAD_REQUEST", "Invalid recordType");
 }
 
-function requirePositiveAmount(amount) {
+function requirePositiveAmount(amount, allowNegative = false) {
   if (amount === undefined || amount === null) {
     throw new AppError(400, "E_BAD_REQUEST", "Missing amount");
   }
   const n = Number(amount);
   if (Number.isNaN(n)) throw new AppError(400, "E_BAD_REQUEST", "amount must be a number");
-  if (n <= 0) throw new AppError(400, "E_BAD_REQUEST", "amount must be > 0");
+  if (!allowNegative && n <= 0) throw new AppError(400, "E_BAD_REQUEST", "amount must be > 0");
   return n;
 }
 
@@ -25,7 +25,8 @@ function normalize(payload) {
   if (!recordMonth) throw new AppError(400, "E_BAD_REQUEST", "Cannot derive recordMonth from recordDate");
 
   validateRecordType(payload.recordType);
-  const nAmount = requirePositiveAmount(payload.amount);
+  const allowNegative = payload.source === "retract";
+  const nAmount = requirePositiveAmount(payload.amount, allowNegative);
   // Ensure numeric fields are numbers for mysql placeholders.
   requireNumber({ amount: nAmount }, "amount");
 

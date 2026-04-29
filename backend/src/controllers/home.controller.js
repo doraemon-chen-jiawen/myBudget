@@ -14,7 +14,8 @@ async function quickRecord(req, res) {
     userId: Number(req.body.userId),
     key: req.body.key,
     date: req.body.date || null,
-    amount: req.body.amount != null ? Number(req.body.amount) : null
+    amount: req.body.amount != null ? Number(req.body.amount) : null,
+    note: req.body.note || null
   });
   return ok(res, data, "Quick record created");
 }

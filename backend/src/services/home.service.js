@@ -3,6 +3,7 @@ const https = require("https");
 
 const recordsDao = require("../dao/records.dao");
 const budgetsDao = require("../dao/budgets.dao");
+const budgetCategoriesDao = require("../dao/budget-categories.dao");
 const recordsService = require("./records.service");
 
 async function getUserStats(userId) {
@@ -63,7 +64,7 @@ async function getHomeIndex({ userId, date }) {
   const today = resolveToday(date);
   const monthKey = today.substring(0, 7); // YYYY-MM
 
-  const [records, monthRecords, dailyBudgets, monthlyBudgets] = await Promise.all([
+  const [records, monthRecords, dailyBudgets, monthlyBudgets, systemDailyCategories, userDailyCategories, monthlyCategories, yearlyCategories] = await Promise.all([
     recordsDao.listRecords({
       userId,
       familyGroupId: null,
@@ -89,7 +90,11 @@ async function getHomeIndex({ userId, date }) {
       userId,
       familyGroupId: null,
       periodType: "monthly"
-    })
+    }),
+    budgetCategoriesDao.listCategories({ userId: null, periodType: "daily" }), // 系统默认分类
+    budgetCategoriesDao.listCategories({ userId, periodType: "daily" }), // 用户自定义分类
+    budgetCategoriesDao.listCategories({ userId, periodType: "monthly" }), // 月度分类
+    budgetCategoriesDao.listCategories({ userId, periodType: "yearly" }) // 年度分类
   ]);
 
   const dailyBudgetSum = (dailyBudgets || []).reduce((sum, item) => sum + Number(item.planned_amount || 0), 0);
@@ -99,6 +104,97 @@ async function getHomeIndex({ userId, date }) {
   const remainTotal = dailyBudgetSum - actualTotal;
   const quickCountMap = buildQuickCountMap(records || []);
 
+  // 构建分类映射
+  const categoryMap = {};
+  (systemDailyCategories || []).forEach(cat => {
+    categoryMap[cat.category_key] = cat;
+  });
+  (userDailyCategories || []).forEach(cat => {
+    // 用户自定义分类覆盖系统默认分类
+    categoryMap[cat.category_key] = cat;
+  });
+
+  // 系统默认的分类键值（始终显示）
+  const systemDefaultKeys = ['breakfast', 'lunch', 'dinner', 'transport'];
+
+  // 从所有预算中提取分类键
+  const allBudgetCategoryKeys = new Set();
+  (dailyBudgets || []).forEach(budget => {
+    const periodKey = budget.period_key;
+    if (periodKey) {
+      let categoryKey = null;
+      if (periodKey.startsWith("daily_")) {
+        categoryKey = periodKey.substring(6);
+      } else {
+        categoryKey = periodKey; // 如果没有前缀，直接使用
+      }
+      if (categoryKey && budget.planned_amount > 0) {
+        allBudgetCategoryKeys.add(categoryKey);
+      }
+    }
+  });
+
+  // 构建快捷项：系统默认分类 + 用户有预算的分类 + "其他"固定项
+  const quickItems = [];
+  const addedKeys = new Set();
+
+  // 1. 首先添加系统默认分类
+  systemDefaultKeys.forEach(categoryKey => {
+    const cat = categoryMap[categoryKey];
+    if (cat) {
+      quickItems.push({
+        key: categoryKey,
+        label: cat.label,
+        icon: cat.icon,
+        amount: Number(cat.default_amount || 0) || 10,
+        count: quickCountMap[categoryKey] || 0,
+        isOther: false
+      });
+      addedKeys.add(categoryKey);
+    }
+  });
+
+  // 2. 添加用户有预算的分类（非系统默认）
+  allBudgetCategoryKeys.forEach(categoryKey => {
+    if (!addedKeys.has(categoryKey) && !systemDefaultKeys.includes(categoryKey)) {
+      const cat = categoryMap[categoryKey];
+      console.log('categoryMap', categoryMap, categoryKey)
+      if (cat) {
+        quickItems.push({
+          key: categoryKey,
+          label: cat.label,
+          icon: cat.icon,
+          amount: Number(cat.default_amount || 0) || 10,
+          count: quickCountMap[categoryKey] || 0,
+          isOther: false
+        });
+        addedKeys.add(categoryKey);
+      } else {
+        // 如果分类不存在于 category_map 中，可能是用户删除了分类但预算还存在
+        // 创建一个临时的快捷项
+        quickItems.push({
+          key: categoryKey,
+          label: '未知分类',
+          icon: '❓',
+          amount: 10,
+          count: quickCountMap[categoryKey] || 0,
+          isOther: false
+        });
+        addedKeys.add(categoryKey);
+      }
+    }
+  });
+
+  // 添加"其他"固定项
+  quickItems.push({
+    key: "other",
+    label: "其他",
+    icon: "➕",
+    amount: 0,
+    count: 0,
+    isOther: true
+  });
+
   // 月度合计：每日预算 × 当月天数 + 月度预算
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -106,6 +202,17 @@ async function getHomeIndex({ userId, date }) {
   const monthBudgetTotal = dailyBudgetSum * daysInMonth + monthlyBudgetSum;
   const monthActualTotal = (monthRecords || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
   const monthRemainTotal = monthBudgetTotal - monthActualTotal;
+
+  // 构建月度和年度分类列表供前端选择
+  const buildCategoryList = (categories) => {
+    return (categories || []).map(cat => ({
+      key: cat.category_key,
+      label: cat.label,
+      icon: cat.icon,
+      defaultAmount: Number(cat.default_amount || 0) || 10,
+      periodType: cat.period_type
+    }));
+  };
 
   return {
     today,
@@ -115,32 +222,72 @@ async function getHomeIndex({ userId, date }) {
     monthBudgetTotal,
     monthActualTotal,
     monthRemainTotal,
-    quickItems: QUICK_ITEMS.map((item) => ({
-      ...item,
-      count: quickCountMap[item.key] || 0
-    }))
+    quickItems,
+    monthlyCategories: buildCategoryList(monthlyCategories),
+    yearlyCategories: buildCategoryList(yearlyCategories)
   };
 }
 
-async function createQuickRecord({ userId, key, date, amount }) {
+async function createQuickRecord({ userId, key, date, amount, note }) {
   if (!userId) throw new AppError(400, "E_BAD_REQUEST", "Missing userId");
   if (!key) throw new AppError(400, "E_BAD_REQUEST", "Missing quick key");
 
-  const item = QUICK_ITEMS.find((quickItem) => quickItem.key === key);
-  if (!item) throw new AppError(400, "E_BAD_REQUEST", "Invalid quick key");
-
-  const recordAmount = amount != null && !isNaN(Number(amount)) ? Number(amount) : item.amount;
   const today = resolveToday(date);
-  await recordsService.create({
-    userId,
-    recordType: "expense",
-    amount: recordAmount,
-    recordDate: today,
-    categorySnapshot: item.label,
-    note: "快捷记账",
-    source: "quick_tap",
-    sourceReference: `quick:${item.key}:${Date.now()}`
-  });
+
+  if (key === "other") {
+    // "其他"项需要验证金额和备注
+    const recordAmount = amount != null && !isNaN(Number(amount)) ? Number(amount) : null;
+    if (!recordAmount || recordAmount <= 0) {
+      throw new AppError(400, "E_BAD_REQUEST", "Amount is required for 'other' category");
+    }
+    if (!note || !note.trim()) {
+      throw new AppError(400, "E_BAD_REQUEST", "Note is required for 'other' category");
+    }
+
+    await recordsService.create({
+      userId,
+      recordType: "expense",
+      amount: recordAmount,
+      recordDate: today,
+      categorySnapshot: "其他",
+      note: note.trim(),
+      source: "quick_tap",
+      sourceReference: `quick:other:${Date.now()}`
+    });
+  } else {
+    // 尝试从不同周期的预算分类获取信息
+    const [dailyCategories, monthlyCategories, yearlyCategories] = await Promise.all([
+      budgetCategoriesDao.listCategories({ userId, periodType: "daily" }),
+      budgetCategoriesDao.listCategories({ userId, periodType: "monthly" }),
+      budgetCategoriesDao.listCategories({ userId, periodType: "yearly" })
+    ]);
+
+    // 依次在日、月、年分类中查找
+    let category = dailyCategories.find(cat => cat.category_key === key);
+    if (!category) {
+      category = monthlyCategories.find(cat => cat.category_key === key);
+    }
+    if (!category) {
+      category = yearlyCategories.find(cat => cat.category_key === key);
+    }
+
+    if (!category) {
+      throw new AppError(400, "E_BAD_REQUEST", "Invalid quick key");
+    }
+
+    const recordAmount = amount != null && !isNaN(Number(amount)) ? Number(amount) : (category.default_amount || 0);
+
+    await recordsService.create({
+      userId,
+      recordType: "expense",
+      amount: recordAmount,
+      recordDate: today,
+      categorySnapshot: category.label,
+      note: note ? note.trim() : "自定义记账",
+      source: "quick_tap",
+      sourceReference: `quick:${key}:${Date.now()}`
+    });
+  }
 
   return getHomeIndex({ userId, date: today });
 }
@@ -150,21 +297,28 @@ async function adjustQuickRecord({ userId, key, date, delta }) {
   if (!key) throw new AppError(400, "E_BAD_REQUEST", "Missing quick key");
   if (delta === 0 || isNaN(delta)) throw new AppError(400, "E_BAD_REQUEST", "Invalid delta");
 
-  const item = QUICK_ITEMS.find((quickItem) => quickItem.key === key);
-  if (!item) throw new AppError(400, "E_BAD_REQUEST", "Invalid quick key");
-
   const today = resolveToday(date);
 
-  // 调整金额：添加一笔调整记录
+  if (key === "other") {
+    // "其他"项不支持调整
+    throw new AppError(400, "E_BAD_REQUEST", "Cannot adjust 'other' category");
+  }
+
+  const dailyCategories = await budgetCategoriesDao.listCategories({ userId, periodType: "daily" });
+  const category = dailyCategories.find(cat => cat.category_key === key);
+  if (!category) {
+    throw new AppError(400, "E_BAD_REQUEST", "Invalid quick key");
+  }
+
   await recordsService.create({
     userId,
     recordType: "expense",
     amount: Math.abs(delta),
     recordDate: today,
-    categorySnapshot: item.label,
+    categorySnapshot: category.label,
     note: delta > 0 ? "快捷记账调整（增加）" : "快捷记账调整（减少）",
     source: "quick_adjust",
-    sourceReference: `adjust:${item.key}:${Date.now()}`
+    sourceReference: `adjust:${key}:${Date.now()}`
   });
 
   return getHomeIndex({ userId, date: today });

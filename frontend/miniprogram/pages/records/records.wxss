@@ -114,15 +114,89 @@
   overflow: hidden;
 }
 
+/* Disabled state for retracted records */
+.record-item.disabled {
+  opacity: 0.5;
+}
+
+.record-item.disabled .record-item-content {
+  background: #f8f9fa;
+}
+
+/* Retract record styles */
+.record-item-content.retract-record {
+  background: #fafafa;
+}
+
+.record-item-content.retract-record .record-icon {
+  background: #e2e8f0;
+}
+
+.record-item-content.retract-record .record-icon-text {
+  color: #94a3b8;
+}
+
+.record-item-content.retract-record .record-category.category-retract,
+.record-item-content.retract-record .record-note.note-retract {
+  color: #94a3b8;
+}
+
+.record-item-content.retract-record .record-amount.amount-retract {
+  color: #94a3b8;
+}
+
 .record-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rpx;
+}
+
+.record-item:last-child {
+  margin-bottom: 0;
+}
+
+.record-item-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 24rpx 28rpx;
+  width: 100%;
+  background: #ffffff;
+  transition: transform 0.3s ease-out;
+  position: relative;
+  z-index: 2;
 }
 
-.record-item + .record-item {
-  border-top: 1rpx solid #f5f7fa;
+.record-item-content.swiped {
+  transform: translateX(-140rpx);
+}
+
+.retract-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 140rpx;
+  background: #FFA726;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  z-index: 1;
+  transition: opacity 0.3s;
+}
+
+.retract-icon {
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 4rpx;
+}
+
+.retract-text {
+  font-size: 22rpx;
 }
 
 .record-left {

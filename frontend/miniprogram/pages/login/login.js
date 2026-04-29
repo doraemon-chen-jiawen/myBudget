@@ -54,6 +54,7 @@ Page({
       wx.setStorageSync("userId", data.userId);
       wx.setStorageSync("token", data.token);
       wx.setStorageSync("loginTime", Date.now());
+      wx.setStorageSync("userInfo", data);
 
       wx.showToast({
         title: "登录成功",

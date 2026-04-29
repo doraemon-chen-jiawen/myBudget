@@ -28,7 +28,7 @@
         data-index="{{index}}"
         bindtap="onSelectMember"
       >
-        <view class="member-avatar">{{item.isAll ? '👥' : (item.nickname.charAt(0))}}</view>
+        <view class="member-avatar">{{item.isAll ? '👥' : '👤'}}</view>
         <text class="member-name">{{item.nickname}}</text>
       </view>
     </view>

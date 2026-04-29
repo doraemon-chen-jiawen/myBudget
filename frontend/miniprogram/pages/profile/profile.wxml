@@ -19,9 +19,6 @@
       <view class="user-detail">
         <text class="greeting">{{greeting}}</text>
         <text class="nickname">{{userInfo.nickname}}</text>
-        <view class="user-id-badge">
-          <text class="user-id-text">ID: {{userId || '未登录'}}</text>
-        </view>
       </view>
     </view>
   </view>
@@ -29,10 +26,10 @@
   <!-- Wave divider -->
   <view class="header-wave"></view>
 
-  <!-- Daily quote -->
+  <!-- Streak days -->
   <view class="quote-card">
-    <text class="quote-icon">💡</text>
-    <text class="quote-text">{{dailyQuote}}</text>
+    <text class="streak-icon">🔥</text>
+    <text class="quote-text">已坚持记账 {{streakDays}} 天</text>
   </view>
 
   <!-- Menu: Features -->

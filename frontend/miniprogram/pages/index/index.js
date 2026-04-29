@@ -26,7 +26,13 @@ Page({
     showFamilySelector: false,
     loading: false,
     dailyQuote: "",
-    quoteType: "" // "good" or "bad"
+    quoteType: "", // "good" or "bad"
+    // "其他"项的模态框
+    showOtherModal: false,
+    otherForm: { amount: "", note: "", selectedCategory: null },
+    // 可选分类数据
+    monthlyCategories: [],
+    yearlyCategories: []
   },
 
   onLoad() {
@@ -118,8 +124,10 @@ Page({
       const newQuickItems = (data?.quickItems || []).map((item) => ({
         key: item.key,
         label: item.label,
+        icon: item.icon || "",
         amount: Number(item.amount || 0),
-        currentAmount: Number(item.amount || 0)
+        currentAmount: Number(item.amount || 0),
+        isOther: item.key === "other" ? true : (item.isOther || false)
       }));
 
       // Merge with existing calibrated amounts
@@ -142,7 +150,9 @@ Page({
             item.currentAmount = existingMap[item.key];
           }
           return item;
-        })
+        }),
+        monthlyCategories: data?.monthlyCategories || [],
+        yearlyCategories: data?.yearlyCategories || []
       });
 
       this.updateQuote();
@@ -152,8 +162,17 @@ Page({
   },
 
   async onTapQuickRecord(event) {
-    const { key, amount } = event.currentTarget.dataset;
+    const { key, amount, isOther } = event.currentTarget.dataset;
     const today = formatDate();
+
+    // 如果是"其他"项，显示模态框让用户选择分类或输入金额和备注
+    if (key === "other" || isOther === true || isOther === "true") {
+      this.setData({
+        showOtherModal: true,
+        otherForm: { amount: "", note: "", selectedCategory: null }
+      });
+      return;
+    }
 
     try {
       const data = await request({
@@ -167,6 +186,11 @@ Page({
         },
         loadingTitle: "记账中"
       });
+
+      // Save first record date if not set
+      if (!wx.getStorageSync("firstRecordDate")) {
+        wx.setStorageSync("firstRecordDate", formatDate());
+      }
 
       wx.showToast({
         title: `已记录 ¥${amount}`,
@@ -184,8 +208,10 @@ Page({
       const newQuickItems = (data?.quickItems || []).map((item) => ({
         key: item.key,
         label: item.label,
+        icon: item.icon || "",
         amount: Number(item.amount || 0),
-        currentAmount: Number(item.amount || 0)
+        currentAmount: Number(item.amount || 0),
+        isOther: item.key === "other" ? true : (item.isOther || false)
       }));
 
       const existingMap = {};
@@ -206,7 +232,9 @@ Page({
             item.currentAmount = existingMap[item.key];
           }
           return item;
-        })
+        }),
+        monthlyCategories: data?.monthlyCategories || [],
+        yearlyCategories: data?.yearlyCategories || []
       });
     } catch (error) {
       // 错误提示已在 request 内统一处理。
@@ -257,5 +285,118 @@ Page({
       dailyQuote: pool[dayIndex],
       quoteType: isUnderBudget ? "good" : "bad"
     });
+  },
+
+  // "其他"项模态框处理
+  onOtherFormInput(e) {
+    const { field } = e.currentTarget.dataset;
+    this.setData({ [`otherForm.${field}`]: e.detail.value });
+  },
+
+  // 选择分类
+  onSelectCategory(e) {
+    const dataset = e.currentTarget.dataset;
+    const category = {
+      key: dataset.key,
+      label: dataset.label,
+      icon: dataset.icon,
+      defaultAmount: Number(dataset.defaultAmount) || 0
+    };
+
+    this.setData({
+      otherForm: {
+        ...this.data.otherForm,
+        selectedCategory: category,
+        amount: category.defaultAmount > 0 ? category.defaultAmount.toString() : "",
+        note: category.key === 'other' ? this.data.otherForm.note : ""
+      }
+    });
+  },
+
+  onCloseOtherModal() {
+    this.setData({
+      showOtherModal: false,
+      otherForm: { amount: "", note: "", selectedCategory: null }
+    });
+  },
+
+  async onSaveOtherRecord() {
+    const { otherForm } = this.data;
+    const amount = Number(otherForm.amount);
+    const note = otherForm.note?.trim();
+
+    // 检查是否选择了分类
+    if (!otherForm.selectedCategory) {
+      wx.showToast({ title: "请先选择分类", icon: "none" });
+      return;
+    }
+
+    // 检查金额
+    if (!amount || amount <= 0) {
+      wx.showToast({ title: "请输入有效金额", icon: "none" });
+      return;
+    }
+
+    // 如果选择了"其他"，需要备注
+    if (otherForm.selectedCategory.key === 'other' && !note) {
+      wx.showToast({ title: "请输入备注", icon: "none" });
+      return;
+    }
+
+    const today = formatDate();
+    const key = otherForm.selectedCategory.key;
+    const finalNote = note || "自定义记账";
+
+    try {
+      const data = await request({
+        url: "/home/quick-record",
+        method: "POST",
+        data: {
+          key,
+          amount,
+          date: today,
+          note: finalNote,
+          ...this.buildUserPayload()
+        },
+        loadingTitle: "记账中"
+      });
+
+      // Save first record date if not set
+      if (!wx.getStorageSync("firstRecordDate")) {
+        wx.setStorageSync("firstRecordDate", formatDate());
+      }
+
+      wx.showToast({
+        title: `已记录 ¥${amount}`,
+        icon: "success"
+      });
+
+      this.onCloseOtherModal();
+
+      // 更新首页数据
+      const newQuickItems = (data?.quickItems || []).map((item) => ({
+        key: item.key,
+        label: item.label,
+        icon: item.icon || "",
+        amount: Number(item.amount || 0),
+        currentAmount: Number(item.amount || 0),
+        isOther: item.key === "other" ? true : (item.isOther || false)
+      }));
+
+      this.setData({
+        today: data?.today || today,
+        budgetTotal: Number(data?.budgetTotal || 0),
+        actualTotal: Number(data?.actualTotal || 0),
+        remainTotal: Number(data?.remainTotal || 0),
+        monthBudgetTotal: Number(data?.monthBudgetTotal || 0),
+        monthActualTotal: Number(data?.monthActualTotal || 0),
+        monthRemainTotal: Number(data?.monthRemainTotal || 0),
+        quickItems: newQuickItems,
+        monthlyCategories: data?.monthlyCategories || [],
+        yearlyCategories: data?.yearlyCategories || []
+      });
+    } catch (error) {
+      // 错误提示已在 request 内统一处理。
+    }
   }
 });

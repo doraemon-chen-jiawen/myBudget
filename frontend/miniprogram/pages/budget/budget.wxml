@@ -32,7 +32,7 @@
   <view class="budget-list">
     <block wx:for="{{budgetCategories}}" wx:key="key" wx:for-item="item">
       <view
-        class="budget-item"
+        class="budget-item {{pendingDeletes[currentTab][item.key] ? 'budget-item--pending-delete' : ''}}"
         style="--item-color: {{item.color || '#6FCF97'}}; --item-bg: {{item.bgColor || 'rgba(111, 207, 151, 0.1)'}}; --item-color-light: {{item.colorLight || 'rgba(111, 207, 151, 0.3)'}}"
       >
         <view class="budget-header">
@@ -40,6 +40,7 @@
           <view class="budget-label-group">
             <text class="budget-label">{{item.label}}</text>
             <text class="budget-hint">{{item.hint || ''}}</text>
+            <text class="pending-delete-tag" wx:if="{{pendingDeletes[currentTab][item.key]}}">待删除</text>
           </view>
           <view class="budget-actions">
             <view class="action-btn action-btn--edit" data-category="{{item.key}}" bindtap="onEditBudget">
@@ -54,7 +55,7 @@
           </view>
         </view>
 
-        <view class="budget-input-wrapper">
+        <view class="budget-input-wrapper {{pendingDeletes[currentTab][item.key] ? 'budget-input-wrapper--disabled' : ''}}">
           <text class="currency-symbol">¥</text>
           <input
             class="budget-input"
@@ -65,10 +66,11 @@
             data-category="{{item.key}}"
             data-type="{{currentTab}}"
             bindinput="onBudgetInput"
+            disabled="{{pendingDeletes[currentTab][item.key]}}"
           />
         </view>
 
-        <view class="quick-amounts" wx:if="{{item.quickAmounts}}">
+        <view class="quick-amounts" wx:if="{{item.quickAmounts && !pendingDeletes[currentTab][item.key]}}">
           <block wx:for="{{item.quickAmounts}}" wx:key="*this" wx:for-item="amount">
             <view
               class="quick-amount-btn"
