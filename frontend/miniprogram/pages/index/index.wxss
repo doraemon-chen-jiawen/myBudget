@@ -156,117 +156,93 @@
   border-radius: 50%;
 }
 
-/* ===== Empty Sack (Over Budget) ===== */
+/* ===== Dead Coins (Over Budget) ===== */
 
-.empty-sack {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 20rpx;
-  animation: sackDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-@keyframes sackDrop {
-  0% { opacity: 0; transform: translateY(-20rpx) scale(0.7); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.sack-body {
+.dead-coins {
   position: relative;
-  width: 72rpx;
-  height: 90rpx;
-  background: linear-gradient(178deg, #F7F3EE 0%, #F0EBE3 30%, #E8E1D6 65%, #E0D8CC 100%);
-  border-radius: 14rpx 14rpx 50% 50% / 14rpx 14rpx 44% 44%;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08),
-              inset 0 -14rpx 24rpx rgba(0, 0, 0, 0.02),
-              inset 4rpx 0 12rpx rgba(0, 0, 0, 0.015);
-  overflow: visible;
+  width: 120rpx;
+  height: 100rpx;
+  animation: coinsDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* 布袋褶皱纹理 */
-.sack-body::before {
-  content: '';
-  position: absolute;
-  top: 28rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 52rpx;
-  height: 44rpx;
-  border-radius: 0 0 50% 50%;
-  background:
-    radial-gradient(ellipse at 30% 50%, rgba(0,0,0,0.025) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 40%, rgba(0,0,0,0.02) 0%, transparent 50%);
+@keyframes coinsDrop {
+  0% { opacity: 0; transform: translateY(-16rpx); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* 底部高光弧线 */
-.sack-body::after {
+.dead-coin {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #C0B8A8 0%, #A8A090 40%, #908880 100%);
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.1),
+              inset 0 1rpx 2rpx rgba(255, 255, 255, 0.15);
+  opacity: 0.55;
+}
+
+.dead-coin::after {
   content: '';
   position: absolute;
-  bottom: 16rpx;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 36rpx;
-  height: 16rpx;
-  background: radial-gradient(ellipse, rgba(255,255,255,0.5) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 50%;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
   border-radius: 50%;
 }
 
-/* 扎口：收拢的布料 */
-.sack-tie {
-  position: absolute;
-  top: -4rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 34rpx;
-  height: 18rpx;
-  background: linear-gradient(180deg, #F0EBE3, #E8E1D6);
-  border-radius: 6rpx 6rpx 2rpx 2rpx;
-  overflow: visible;
+.dc-1 {
+  width: 30rpx;
+  height: 30rpx;
+  left: 16rpx;
+  bottom: 8rpx;
+  transform: rotate(-25deg);
 }
 
-/* 布料皱褶纹理 */
-.sack-tie::before {
-  content: '';
-  position: absolute;
-  top: 2rpx;
-  left: 4rpx;
-  right: 4rpx;
-  height: 100%;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(0,0,0,0.04), transparent 40%),
-    radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.03), transparent 35%),
-    radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.04), transparent 40%);
-  border-radius: 4rpx;
+.dc-2 {
+  width: 28rpx;
+  height: 28rpx;
+  left: 42rpx;
+  bottom: 4rpx;
+  transform: rotate(15deg);
 }
 
-/* 绳子绑口 + 垂下的两个绳头 */
-.sack-tie::after {
-  content: '';
-  position: absolute;
-  bottom: -3rpx;
-  left: -8rpx;
-  right: -8rpx;
-  height: 5rpx;
-  background: #B8A080;
-  border-radius: 3rpx;
-  box-shadow:
-    -4rpx 12rpx 0 1rpx #B8A080,
-    -3rpx 20rpx 0 0rpx rgba(184, 160, 128, 0.7),
-    4rpx 14rpx 0 1rpx #B8A080,
-    3rpx 22rpx 0 0rpx rgba(184, 160, 128, 0.6);
+.dc-3 {
+  width: 26rpx;
+  height: 26rpx;
+  left: 68rpx;
+  bottom: 10rpx;
+  transform: rotate(-10deg);
 }
 
-.sack-patch {
-  display: none;
+.dc-4 {
+  width: 24rpx;
+  height: 24rpx;
+  left: 32rpx;
+  bottom: 28rpx;
+  transform: rotate(35deg);
+  opacity: 0.4;
+}
+
+.dc-5 {
+  width: 20rpx;
+  height: 20rpx;
+  left: 56rpx;
+  bottom: 24rpx;
+  transform: rotate(-40deg);
+  opacity: 0.35;
 }
 
 /* ===== Broke Effect — Skull Float ===== */
 
 .broke-effect {
   position: absolute;
-  inset: -60rpx;
+  top: -40rpx;
+  left: -40rpx;
+  right: -40rpx;
+  height: 80rpx;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   pointer-events: none;
   z-index: 20;
@@ -281,7 +257,7 @@
 }
 
 .skull-ghost {
-  font-size: 56rpx;
+  font-size: 48rpx;
   line-height: 1;
   filter: grayscale(0.3) brightness(0.85);
 }
@@ -295,12 +271,12 @@
 }
 
 @keyframes skullFloat {
-  0% { opacity: 0; transform: translateY(40rpx) scale(0.4); }
-  20% { opacity: 1; transform: translateY(-10rpx) scale(1.1); }
-  35% { transform: translateY(-6rpx) scale(1) rotate(6deg); }
-  50% { transform: translateY(-20rpx) scale(1) rotate(-4deg); }
-  65% { opacity: 1; transform: translateY(-36rpx) scale(0.95) rotate(2deg); }
-  100% { opacity: 0; transform: translateY(-80rpx) scale(0.7) rotate(0deg); }
+  0% { opacity: 0; transform: translateY(20rpx) scale(0.4); }
+  20% { opacity: 1; transform: translateY(-8rpx) scale(1.1); }
+  35% { transform: translateY(-4rpx) scale(1) rotate(6deg); }
+  50% { transform: translateY(-16rpx) scale(1) rotate(-4deg); }
+  65% { opacity: 1; transform: translateY(-28rpx) scale(0.95) rotate(2deg); }
+  100% { opacity: 0; transform: translateY(-60rpx) scale(0.7) rotate(0deg); }
 }
 
 /* ===== Spend Effect ===== */
