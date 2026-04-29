@@ -1,10 +1,17 @@
 -- ============================================================
--- Seed: system default budget categories (upsert version)
--- 可以安全地重复执行，会更新现有系统默认分类
--- 不会影响用户自定义的分类
--- 注意：使用年度预算前请先执行 add_yearly_support.sql
+-- Seed: 系统初始数据（可重复执行）
+-- 包含：默认管理员用户 + 系统默认预算分类
+-- 前置：先执行 database/schema.sql 建表
 -- ============================================================
 
+-- 默认管理员用户（密码: password123）
+INSERT INTO users (username, password_hash, nickname, wechat_openid, is_active, created_at, updated_at)
+VALUES ('admin', '$2b$10$nFrankQeW.Ie5NEAwdqGLexzHHYH2dM7kYy15m2qFR0yi4jXFe2mi', '管理员', NULL, 1, NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+    password_hash = VALUES(password_hash),
+    nickname = VALUES(nickname);
+
+-- 系统默认预算分类
 INSERT INTO budget_categories
   (user_id, period_type, category_key, label, icon, hint, color, bg_color, color_light, quick_amounts, default_amount, sort_order, is_system, is_active, updated_at)
 VALUES
@@ -23,7 +30,7 @@ VALUES
   -- Finance (2)
   (NULL, 'finance_interest', 'interest_daily',  '每日利息预算','💎','理财每日收益目标','#6FCF97','rgba(111,207,151,0.1)','rgba(111,207,151,0.3)','["30","50","100"]',    50.00,  1, 1, 1, CURRENT_TIMESTAMP),
   (NULL, 'finance_interest', 'interest_monthly', '每月利息预算','📈','理财月度收益目标','#56CCF2','rgba(86,204,242,0.1)','rgba(86,204,242,0.3)','["500","1000","2000"]', 1000.00, 2, 1, 1, CURRENT_TIMESTAMP),
-  -- Yearly (2) - 需要先执行 add_yearly_support.sql
+  -- Yearly (2)
   (NULL, 'yearly', 'travel',           '旅游',        '✈️', '年度旅游支出',        '#2E86DE', 'rgba(46,134,222,0.1)',   'rgba(46,134,222,0.3)',   '["2000","4000","6000"]', 5000.00, 1, 1, 1, CURRENT_TIMESTAMP),
   (NULL, 'yearly', 'parents',          '孝敬父母',     '👨‍👩‍👧', '给父母的孝心',        '#FF6B6B', 'rgba(255,107,107,0.1)', 'rgba(255,107,107,0.3)', '["500","1000","5000"]', 10000.00, 2, 1, 1, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
@@ -38,10 +45,3 @@ ON DUPLICATE KEY UPDATE
   sort_order = VALUES(sort_order),
   is_active = VALUES(is_active),
   updated_at = VALUES(updated_at);
-
--- ============================================================
--- 注意事项：
--- 1. 如果遇到 "Data truncated for column 'period_type'" 错误，
---    请先执行 add_yearly_support.sql 添加 yearly 周期支持
--- 2. 这个脚本可以安全地重复执行
--- ============================================================

@@ -15,7 +15,8 @@ Page({
     },
     userId: null,
     greeting: "Hi，你好 👋",
-    streakDays: 0
+    streakDays: 0,
+    dailyQuote: ""
   },
 
   onLoad() {
@@ -65,6 +66,27 @@ Page({
         avatarAnimal: randomAnimal()
       }
     });
+
+    this.updateQuote();
+  },
+
+  updateQuote() {
+    const quotes = [
+      "省钱是通往自由的第一步",
+      "克制是一种高级的自由",
+      "今天省下的每一分，都是未来的底气",
+      "自律即富裕",
+      "钱包鼓了，腰杆就直了",
+      "省到就是赚到",
+      "克制消费，是一种优雅的自律",
+      "钱不是万能的，但没钱是万万不能的",
+      "你花的不是钱，是未来的自由",
+      "别让钱包为冲动买单",
+      "手痒痒的时候，看看余额",
+      "省钱不丢人，月光才尴尬"
+    ];
+    const dayIndex = new Date().getDate() % quotes.length;
+    this.setData({ dailyQuote: quotes[dayIndex] });
   },
 
   onChooseAvatar() {

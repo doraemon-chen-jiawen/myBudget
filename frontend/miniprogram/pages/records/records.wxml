@@ -31,7 +31,7 @@
       <view class="record-card">
         <view class="record-item {{rec.isRetracted ? 'disabled' : ''}}" wx:for="{{item.items}}" wx:for-item="rec" wx:key="id">
           <view
-            class="record-item-content {{rec.swiped ? 'swiped' : ''}} {{rec.isRetract ? 'retract-record' : ''}}"
+            class="record-item-content {{rec.swiped ? 'swiped' : ''}}"
             bindtouchstart="onTouchStart"
             bindtouchmove="onTouchMove"
             bindtouchend="onTouchEnd"
@@ -43,19 +43,20 @@
             data-record-date="{{rec.recordDate}}"
           >
             <view class="record-left">
-              <view class="record-icon {{rec.type === 'expense' ? 'icon-expense' : 'icon-income'}} {{rec.isRetract ? 'icon-retract' : ''}}">
-                <text class="record-icon-text">{{rec.isRetract ? '↺' : (rec.type === 'expense' ? '↓' : '↑')}}</text>
+              <view class="record-icon {{rec.type === 'expense' ? 'icon-expense' : 'icon-income'}}">
+                <text class="record-icon-text">{{rec.type === 'expense' ? '↓' : '↑'}}</text>
               </view>
               <view class="record-info">
-                <text class="record-category {{rec.isRetract ? 'category-retract' : ''}}">{{rec.category}}</text>
-                <text class="record-note {{rec.isRetract ? 'note-retract' : ''}}" wx:if="{{rec.note}}">{{rec.note}}</text>
+                <text class="record-category">{{rec.category}}</text>
+                <text class="record-note" wx:if="{{rec.note}}">{{rec.note}}</text>
               </view>
             </view>
-            <text class="record-amount {{rec.type === 'expense' ? 'amount-expense' : 'amount-income'}} {{rec.isRetract ? 'amount-retract' : ''}}">
-              ¥{{rec.amount}}
-            </text>
+            <view class="record-right">
+              <text class="record-amount {{rec.type === 'expense' ? 'amount-expense' : 'amount-income'}}">¥{{rec.amount}}</text>
+              <text class="retracted-tag" wx:if="{{rec.isRetracted}}">已撤回</text>
+            </view>
           </view>
-          <view class="retract-btn" bindtap="onRetract" data-id="{{rec.id}}" data-amount="{{rec.amount}}" data-type="{{rec.type}}" data-category="{{rec.category}}" data-note="{{rec.note}}" data-record-date="{{rec.recordDate}}" wx:if="{{!rec.isRetracted && !rec.isRetract}}">
+          <view class="retract-btn" bindtap="onRetract" data-id="{{rec.id}}" data-amount="{{rec.amount}}" data-type="{{rec.type}}" data-category="{{rec.category}}" data-note="{{rec.note}}" data-record-date="{{rec.recordDate}}" wx:if="{{!rec.isRetracted}}">
             <text class="retract-icon">↺</text>
             <text class="retract-text">撤回</text>
           </view>

@@ -1,5 +1,11 @@
 -- myBudget database schema (OpenSpec-CN)
--- Dev/Test friendly: this script rebuilds tables.
+-- 终极版：已整合所有 migrations 的变更
+-- 变更记录：
+--   - users: wechat_openid 改为可空，添加 username/password_hash
+--   - budget_categories: period_type 添加 yearly
+--   - budgets: period_type 添加 yearly，period_key 扩展为 VARCHAR(100)，添加 budget_year
+--   - records: source 改为 VARCHAR(50)，移除 amount 正数约束
+--   - 新增 user_hidden_categories 表
 
 CREATE DATABASE IF NOT EXISTS lazy_budget
   DEFAULT CHARACTER SET utf8mb4
@@ -11,6 +17,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP VIEW IF EXISTS bank_accounts;
 DROP VIEW IF EXISTS finance_accounts;
 
+DROP TABLE IF EXISTS user_hidden_categories;
 DROP TABLE IF EXISTS auto_fill_logs;
 DROP TABLE IF EXISTS interest_records;
 DROP TABLE IF EXISTS records;
@@ -19,14 +26,17 @@ DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS frequent_items;
 DROP TABLE IF EXISTS family_members;
 DROP TABLE IF EXISTS family_groups;
+DROP TABLE IF EXISTS budget_categories;
 DROP TABLE IF EXISTS users;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- users
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  wechat_openid VARCHAR(64) NOT NULL,
+  username VARCHAR(50) DEFAULT NULL,
+  password_hash VARCHAR(255) DEFAULT NULL,
+  wechat_openid VARCHAR(100) DEFAULT NULL,
   nickname VARCHAR(64) NOT NULL DEFAULT '',
   avatar_url VARCHAR(255) DEFAULT NULL,
   phone VARCHAR(20) DEFAULT NULL,
@@ -35,12 +45,13 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uk_users_username (username),
   UNIQUE KEY uk_users_wechat_openid (wechat_openid),
   KEY idx_users_nickname (nickname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- family_groups
-CREATE TABLE IF NOT EXISTS family_groups (
+CREATE TABLE family_groups (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   owner_user_id BIGINT UNSIGNED NOT NULL,
   name VARCHAR(100) NOT NULL,
@@ -56,7 +67,7 @@ CREATE TABLE IF NOT EXISTS family_groups (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- family_members
-CREATE TABLE IF NOT EXISTS family_members (
+CREATE TABLE family_members (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   family_group_id BIGINT UNSIGNED NOT NULL,
   user_id BIGINT UNSIGNED NOT NULL,
@@ -77,7 +88,7 @@ CREATE TABLE IF NOT EXISTS family_members (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- frequent_items
-CREATE TABLE IF NOT EXISTS frequent_items (
+CREATE TABLE frequent_items (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
@@ -99,11 +110,11 @@ CREATE TABLE IF NOT EXISTS frequent_items (
     ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- budget_categories (system defaults + user custom)
-CREATE TABLE IF NOT EXISTS budget_categories (
+-- budget_categories (system defaults + user custom, supports yearly)
+CREATE TABLE budget_categories (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id       BIGINT UNSIGNED DEFAULT NULL          COMMENT 'NULL = system default category',
-  period_type   ENUM('daily','monthly','finance_interest') NOT NULL,
+  period_type   ENUM('daily','monthly','finance_interest','yearly') NOT NULL,
   category_key  VARCHAR(64)  NOT NULL,
   label         VARCHAR(64)  NOT NULL,
   icon          VARCHAR(16)  NOT NULL DEFAULT '✨',
@@ -128,7 +139,7 @@ CREATE TABLE IF NOT EXISTS budget_categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- accounts (saving + finance unified)
-CREATE TABLE IF NOT EXISTS accounts (
+CREATE TABLE accounts (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
@@ -172,26 +183,27 @@ CREATE OR REPLACE VIEW bank_accounts AS
 CREATE OR REPLACE VIEW finance_accounts AS
   SELECT * FROM accounts WHERE account_kind='finance';
 
--- budgets (daily/monthly/finance_interest)
-CREATE TABLE IF NOT EXISTS budgets (
+-- budgets (daily/monthly/finance_interest/yearly)
+CREATE TABLE budgets (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
 
-  period_type ENUM('daily','monthly','finance_interest') NOT NULL,
-  period_key VARCHAR(10) NOT NULL, -- daily: YYYY-MM-DD, monthly/finance_interest: YYYY-MM
+  period_type ENUM('daily','monthly','finance_interest','yearly') NOT NULL,
+  period_key VARCHAR(100) NOT NULL,
 
-  budget_date DATE DEFAULT NULL,      -- daily
-  budget_month CHAR(7) DEFAULT NULL, -- monthly/finance_interest
+  budget_date DATE DEFAULT NULL,
+  budget_month CHAR(7) DEFAULT NULL,
+  budget_year CHAR(4) DEFAULT NULL COMMENT '年度预算年份 (YYYY)',
 
-  account_id BIGINT UNSIGNED DEFAULT NULL, -- finance_interest: required (finance account)
+  account_id BIGINT UNSIGNED DEFAULT NULL,
 
-  -- daily/monthly
+  -- daily/monthly/yearly
   planned_amount DECIMAL(12,2) DEFAULT NULL,
 
   -- finance_interest
-  planned_annual_rate DECIMAL(8,4) DEFAULT NULL,       -- e.g. 0.1000 for 10%
-  planned_principal_amount DECIMAL(14,2) DEFAULT NULL, -- snapshot principal for calculation
+  planned_annual_rate DECIMAL(8,4) DEFAULT NULL,
+  planned_principal_amount DECIMAL(14,2) DEFAULT NULL,
 
   planned_interest_amount DECIMAL(12,2) GENERATED ALWAYS AS
     (planned_principal_amount * planned_annual_rate / 12) STORED,
@@ -201,9 +213,6 @@ CREATE TABLE IF NOT EXISTS budgets (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  -- uniqueness scope for budgets:
-  --  - daily/monthly: account_scope_id = 0
-  --  - finance_interest: account_scope_id = account_id
   account_scope_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 
   PRIMARY KEY (id),
@@ -227,30 +236,36 @@ CREATE TABLE IF NOT EXISTS budgets (
     CHECK (
       -- daily
       (period_type='daily'
-        AND budget_date IS NOT NULL AND budget_month IS NULL AND account_id IS NULL
+        AND budget_date IS NOT NULL AND budget_month IS NULL AND budget_year IS NULL AND account_id IS NULL
         AND planned_amount IS NOT NULL
         AND planned_annual_rate IS NULL AND planned_principal_amount IS NULL
       )
       OR
       -- monthly
       (period_type='monthly'
-        AND budget_month IS NOT NULL AND budget_date IS NULL AND account_id IS NULL
+        AND budget_month IS NOT NULL AND budget_date IS NULL AND budget_year IS NULL AND account_id IS NULL
         AND planned_amount IS NOT NULL
         AND planned_annual_rate IS NULL AND planned_principal_amount IS NULL
       )
       OR
       -- finance_interest
       (period_type='finance_interest'
-        AND budget_month IS NOT NULL AND budget_date IS NULL AND account_id IS NOT NULL
+        AND budget_month IS NOT NULL AND budget_date IS NULL AND budget_year IS NULL AND account_id IS NOT NULL
         AND planned_amount IS NULL
-        AND planned_annual_rate IS NOT NULL
-        AND planned_principal_amount IS NOT NULL
+        AND planned_annual_rate IS NOT NULL AND planned_principal_amount IS NOT NULL
+      )
+      OR
+      -- yearly
+      (period_type='yearly'
+        AND budget_year IS NOT NULL AND budget_date IS NULL AND budget_month IS NULL AND account_id IS NULL
+        AND planned_amount IS NOT NULL
+        AND planned_annual_rate IS NULL AND planned_principal_amount IS NULL
       )
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- records
-CREATE TABLE IF NOT EXISTS records (
+-- records (source 改为 VARCHAR 支持扩展，移除 amount 正数约束)
+CREATE TABLE records (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
@@ -263,7 +278,7 @@ CREATE TABLE IF NOT EXISTS records (
   category_snapshot VARCHAR(64) DEFAULT NULL,
   account_id BIGINT UNSIGNED DEFAULT NULL,
   note VARCHAR(255) DEFAULT NULL,
-  source ENUM('manual','import','auto') NOT NULL DEFAULT 'manual',
+  source VARCHAR(50) NOT NULL DEFAULT 'manual',
   source_reference VARCHAR(128) DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -287,13 +302,11 @@ CREATE TABLE IF NOT EXISTS records (
     ON DELETE SET NULL,
   CONSTRAINT fk_records_account
     FOREIGN KEY (account_id) REFERENCES accounts(id)
-    ON DELETE SET NULL,
-  CONSTRAINT ck_records_amount_positive
-    CHECK (amount > 0)
+    ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- interest_records
-CREATE TABLE IF NOT EXISTS interest_records (
+CREATE TABLE interest_records (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   account_id BIGINT UNSIGNED NOT NULL,
@@ -322,8 +335,25 @@ CREATE TABLE IF NOT EXISTS interest_records (
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- user_hidden_categories
+CREATE TABLE user_hidden_categories (
+  id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id       BIGINT UNSIGNED NOT NULL,
+  category_id   BIGINT UNSIGNED NOT NULL COMMENT '被隐藏的内置分类ID',
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_user_hidden_category (user_id, category_id),
+  KEY idx_user_hidden_categories_user_id (user_id),
+  CONSTRAINT fk_user_hidden_categories_user
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_user_hidden_categories_category
+    FOREIGN KEY (category_id) REFERENCES budget_categories(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- auto_fill_logs
-CREATE TABLE IF NOT EXISTS auto_fill_logs (
+CREATE TABLE auto_fill_logs (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
@@ -365,8 +395,7 @@ CREATE TABLE IF NOT EXISTS auto_fill_logs (
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Triggers (constraints that cannot be expressed by CHECK alone)
--- Enforce budgets.finance_interest.account_id points to accounts.account_kind='finance'
+-- Triggers
 DROP TRIGGER IF EXISTS trg_budgets_bi;
 DROP TRIGGER IF EXISTS trg_budgets_bu;
 

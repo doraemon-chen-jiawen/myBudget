@@ -25,8 +25,27 @@ Page({
     selectedFamilyIndex: -1,
     showFamilySelector: false,
     loading: false,
-    dailyQuote: "",
-    quoteType: "", // "good" or "bad"
+    visibleIngots: 15,
+    isOverBudget: false,
+    showFlyingAnimation: false,
+    showBrokeAnimation: false,
+    ingots: [
+      { x: -8, y: 105, r: -18, s: 1.0, z: 1 },
+      { x: 18, y: 115, r: 28, s: 1.0, z: 1 },
+      { x: 42, y: 102, r: -10, s: 1.0, z: 1 },
+      { x: 64, y: 112, r: 35, s: 1.0, z: 1 },
+      { x: 88, y: 108, r: -25, s: 1.0, z: 1 },
+      { x: 5, y: 82, r: 22, s: 0.95, z: 2 },
+      { x: 30, y: 78, r: -30, s: 0.95, z: 2 },
+      { x: 55, y: 88, r: 15, s: 0.95, z: 2 },
+      { x: 78, y: 80, r: -20, s: 0.95, z: 2 },
+      { x: 15, y: 58, r: -15, s: 0.9, z: 3 },
+      { x: 42, y: 54, r: 25, s: 0.9, z: 3 },
+      { x: 65, y: 62, r: -28, s: 0.9, z: 3 },
+      { x: 28, y: 35, r: 20, s: 0.85, z: 4 },
+      { x: 55, y: 38, r: -12, s: 0.85, z: 4 },
+      { x: 40, y: 15, r: -8, s: 0.8, z: 5 }
+    ],
     // "其他"项的模态框
     showOtherModal: false,
     otherForm: { amount: "", note: "", selectedCategory: null },
@@ -155,7 +174,7 @@ Page({
         yearlyCategories: data?.yearlyCategories || []
       });
 
-      this.updateQuote();
+      this.updateTreasure();
     } catch (error) {
       // 错误提示已在 request 内统一处理，此处不再重复 toast。
     }
@@ -197,7 +216,7 @@ Page({
         icon: "success"
       });
 
-      // Reset calibrated amount to default after recording
+      this.triggerFlyingAnimation();
       const items = this.data.quickItems.map((item) => {
         if (item.key === key) {
           return { ...item, currentAmount: item.amount };
@@ -236,6 +255,8 @@ Page({
         monthlyCategories: data?.monthlyCategories || [],
         yearlyCategories: data?.yearlyCategories || []
       });
+
+      this.updateTreasure();
     } catch (error) {
       // 错误提示已在 request 内统一处理。
     }
@@ -255,36 +276,34 @@ Page({
     wx.vibrateShort({ type: "light" });
   },
 
-  updateQuote() {
-    const { remainTotal, monthRemainTotal } = this.data;
-    const isUnderBudget = remainTotal >= 0 && monthRemainTotal >= 0;
+  updateTreasure() {
+    const { remainTotal, budgetTotal } = this.data;
+    const isOverBudget = remainTotal < 0;
+    if (isOverBudget) {
+      this.setData({ isOverBudget: true, visibleIngots: 0 });
+      return;
+    }
+    const ratio = budgetTotal > 0 ? Math.max(0, Math.min(1, remainTotal / budgetTotal)) : 0;
+    // <10% 只留 1 个元宝
+    const visibleIngots = ratio < 0.1 ? 1 : (5 + Math.round(ratio * 10));
+    this.setData({ isOverBudget: false, visibleIngots });
+  },
 
-    const goodQuotes = [
-      "省钱是通往自由的第一步",
-      "克制是一种高级的自由",
-      "今天省下的每一分，都是未来的底气",
-      "自律即富裕",
-      "钱包鼓了，腰杆就直了",
-      "省到就是赚到",
-      "克制消费，是一种优雅的自律"
-    ];
-
-    const badQuotes = [
-      "钱不是万能的，但没钱是万万不能的",
-      "你花的不是钱，是未来的自由",
-      "别让钱包为冲动买单",
-      "今天买买买，明天吃土土",
-      "每一笔多余的花销，都是明天的后悔",
-      "手痒痒的时候，看看余额",
-      "省钱不丢人，月光才尴尬"
-    ];
-
-    const pool = isUnderBudget ? goodQuotes : badQuotes;
-    const dayIndex = new Date().getDate() % pool.length;
-    this.setData({
-      dailyQuote: pool[dayIndex],
-      quoteType: isUnderBudget ? "good" : "bad"
-    });
+  triggerFlyingAnimation() {
+    if (this.data.isOverBudget) {
+      // 透支时显示"穷鬼别花了"抖动文字
+      this.setData({ showBrokeAnimation: true });
+      wx.vibrateShort({ type: "heavy" });
+      setTimeout(() => {
+        this.setData({ showBrokeAnimation: false });
+      }, 1200);
+      return;
+    }
+    this.setData({ showFlyingAnimation: true });
+    wx.vibrateShort({ type: "heavy" });
+    setTimeout(() => {
+      this.setData({ showFlyingAnimation: false });
+    }, 1200);
   },
 
   // "其他"项模态框处理
@@ -371,7 +390,7 @@ Page({
         icon: "success"
       });
 
-      this.onCloseOtherModal();
+      this.triggerFlyingAnimation();
 
       // 更新首页数据
       const newQuickItems = (data?.quickItems || []).map((item) => ({
@@ -395,6 +414,8 @@ Page({
         monthlyCategories: data?.monthlyCategories || [],
         yearlyCategories: data?.yearlyCategories || []
       });
+
+      this.updateTreasure();
     } catch (error) {
       // 错误提示已在 request 内统一处理。
     }

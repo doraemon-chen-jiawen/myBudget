@@ -580,6 +580,7 @@
   font-size: 30rpx;
   font-weight: 600;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
 .modal-btn--secondary {

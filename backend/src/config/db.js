@@ -9,7 +9,8 @@ const pool = mysql.createPool({
   database: env.db.database,
   waitForConnections: true,
   connectionLimit: env.db.connectionLimit,
-  queueLimit: 0
+  queueLimit: 0,
+  dateStrings: ["DATE"]
 });
 
 async function checkDatabaseConnection() {

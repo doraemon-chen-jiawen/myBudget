@@ -12,9 +12,44 @@
         <text class="hero-amount {{remainTotal < 0 ? 'negative' : 'positive'}}">¥{{remainTotal}}</text>
         <text class="hero-date">{{month}}月{{day}}日 {{weekday}}</text>
       </view>
-      <view class="hero-quote-wrap">
-        <text class="hero-quote-icon">"</text>
-        <text class="hero-quote">{{dailyQuote}}</text>
+      <view class="hero-treasure">
+        <!-- 透支：枯萎硬币堆 -->
+        <view class="dead-coins" wx:if="{{isOverBudget}}">
+          <view class="dead-coin dc-1"></view>
+          <view class="dead-coin dc-2"></view>
+          <view class="dead-coin dc-3"></view>
+          <view class="dead-coin dc-4"></view>
+          <view class="dead-coin dc-5"></view>
+        </view>
+        <!-- 正常：金元宝山 -->
+        <block wx:else>
+          <view class="treasure-glow"></view>
+          <view class="treasure-mountain">
+            <view class="ingot" wx:for="{{ingots}}" wx:key="index"
+              style="left:{{item.x}}rpx;top:{{item.y}}rpx;transform:rotate({{item.r}}deg) scale({{item.s}});z-index:{{item.z}};opacity:{{index < visibleIngots ? 1 : 0}}">
+            </view>
+          </view>
+          <view class="spend-effect" wx:if="{{showFlyingAnimation}}">
+            <view class="flying-ingot fi-1"></view>
+            <view class="flying-ingot fi-2"></view>
+            <view class="flying-ingot fi-3"></view>
+            <view class="flying-ingot fi-4"></view>
+            <view class="flying-ingot fi-5"></view>
+            <view class="flying-coin fc-1"></view>
+            <view class="flying-coin fc-2"></view>
+            <view class="flying-coin fc-3"></view>
+            <view class="flying-coin fc-4"></view>
+            <view class="flying-coin fc-5"></view>
+            <view class="spend-flash"></view>
+          </view>
+        </block>
+        <!-- 透支时记账才飘出来 -->
+        <view class="broke-effect" wx:if="{{showBrokeAnimation}}">
+          <view class="broke-skull">
+            <text class="skull-ghost">💀</text>
+            <text class="broke-text">穷鬼别花了</text>
+          </view>
+        </view>
       </view>
     </view>
   </view>
@@ -79,10 +114,10 @@
         wx:key="key"
         class="quick-item {{item.isOther ? 'quick-item--other' : ''}}"
       >
-        <view class="quick-item-header">
+        <view class="quick-item-header" wx:if="{{!item.isOther}}">
           <view class="quick-icon">{{item.icon}}</view>
           <text class="quick-label">{{item.label}}</text>
-          <view class="quick-amount-badge" wx:if="{{!item.isOther}}">
+          <view class="quick-amount-badge">
             <text class="quick-amount">¥{{item.currentAmount}}</text>
           </view>
         </view>
@@ -99,7 +134,7 @@
           data-amount="{{item.currentAmount}}"
           data-isOther="{{item.isOther}}"
           bindtap="onTapQuickRecord"
-        >{{item.isOther ? '自定义记账' : '记一笔'}}</button>
+        >{{item.isOther ? '  + 自定义记账' : '记一笔'}}</button>
       </view>
     </view>
   </view>

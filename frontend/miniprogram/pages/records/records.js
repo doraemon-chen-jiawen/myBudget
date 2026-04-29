@@ -98,17 +98,13 @@ Page({
         if (usedIds.has(item.id)) continue;
 
         if (item.source === "retract" && item.sourceReference) {
-          // 撤回记录
-          const originalItem = g.items.find(i => i.id === item.sourceReference);
+          // 对冲记录：只标记原记录为已撤回，对冲记录本身不显示
+          const originalItem = g.items.find(i => String(i.id) === String(item.sourceReference));
           if (originalItem && !usedIds.has(originalItem.id)) {
-            // 添加原记录，标记为已撤回
             reorderedItems.push({ ...originalItem, isRetracted: true });
             usedIds.add(originalItem.id);
-
-            // 添加撤回记录，标记为撤回类型
-            reorderedItems.push({ ...item, isRetract: true });
-            usedIds.add(item.id);
           }
+          usedIds.add(item.id);
         }
       }
 

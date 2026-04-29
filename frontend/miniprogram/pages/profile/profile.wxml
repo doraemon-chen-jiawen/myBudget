@@ -28,8 +28,8 @@
 
   <!-- Streak days -->
   <view class="quote-card">
-    <text class="streak-icon">🔥</text>
-    <text class="quote-text">已坚持记账 {{streakDays}} 天</text>
+    <text class="quote-icon">💡</text>
+    <text class="quote-text">{{dailyQuote}}</text>
   </view>
 
   <!-- Menu: Features -->
