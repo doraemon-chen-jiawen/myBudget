@@ -1,0 +1,27 @@
+<view class="bar-chart-container">
+  <view class="bar-chart-title">{{year}}年支出统计</view>
+  <view class="bar-chart-empty" wx:if="{{monthlyData.length === 0 || totalAmount === 0}}">
+    <text class="bar-chart-empty-text">暂无数据</text>
+  </view>
+  <view class="bar-chart-body" wx:else>
+    <view
+      class="bar-item"
+      wx:for="{{monthlyData}}"
+      wx:key="month"
+      data-month="{{item.month}}"
+      data-amount="{{item.amount}}"
+      data-budget="{{item.budget}}"
+      data-status="{{item.status}}"
+      bindtap="onBarTap"
+    >
+      <view class="bar-value" wx:if="{{item.amount > 0}}">{{item.amount}}</view>
+      <view
+        class="bar"
+        style="height: {{getBarHeight(item.amount)}}%; background: {{getBarColor(item.status)}};"
+        wx:if="{{item.amount > 0}}"
+      ></view>
+      <view class="bar-placeholder" wx:else></view>
+      <view class="bar-label">{{months[item.month - 1]}}</view>
+    </view>
+  </view>
+</view>

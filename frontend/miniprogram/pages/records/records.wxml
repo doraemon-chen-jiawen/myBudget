@@ -24,7 +24,7 @@
       <view class="date-header">
         <text class="date-label">{{item.dayLabel}}</text>
         <view class="date-summary">
-          <text class="date-expense" wx:if="{{item.dayExpense > 0}}">支 ¥{{item.dayExpense}}</text>
+          <text class="date-expense" wx:if="{{item.dayExpense > 0}}">支 ¥-{{item.dayExpense}}</text>
           <text class="date-income" wx:if="{{item.dayIncome > 0}}">收 ¥{{item.dayIncome}}</text>
         </view>
       </view>
@@ -52,7 +52,7 @@
               </view>
             </view>
             <view class="record-right">
-              <text class="record-amount {{rec.type === 'expense' ? 'amount-expense' : 'amount-income'}}">¥{{rec.amount}}</text>
+              <text class="record-amount {{rec.type === 'expense' ? 'amount-expense' : 'amount-income'}}">¥{{rec.displayAmount}}</text>
               <text class="retracted-tag" wx:if="{{rec.isRetracted}}">已撤回</text>
             </view>
           </view>

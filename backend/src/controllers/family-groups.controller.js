@@ -15,9 +15,12 @@ async function create(req, res) {
 
 async function list(req, res) {
   /**
-   * GET /api/family-groups?ownerUserId=...
+   * GET /api/family-groups?ownerUserId=...&userId=...
    */
-  const data = await service.list({ ownerUserId: req.query.ownerUserId ?? null });
+  const data = await service.list({
+    ownerUserId: req.query.ownerUserId ?? null,
+    userId: req.query.userId ?? null
+  });
   return ok(res, data);
 }
 

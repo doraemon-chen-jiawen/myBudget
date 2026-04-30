@@ -35,12 +35,21 @@
 }
 
 /* ===== Date Nav ===== */
+.date-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 32rpx;
+  background: #ffffff;
+  gap: 24rpx;
+}
+
 .date-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16rpx 0 24rpx;
-  background: #ffffff;
+  gap: 16rpx;
+  flex: 1;
 }
 
 .date-arrow {
@@ -68,11 +77,21 @@
   text-align: center;
 }
 
+.date-text-clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.date-text-clickable:active {
+  color: #6FCF97;
+}
+
 /* ===== Member Selector ===== */
 .member-scroll {
   white-space: nowrap;
   padding: 0 24rpx 20rpx;
   background: #ffffff;
+  box-sizing:border-box;
 }
 
 .member-list {
@@ -124,12 +143,34 @@
 
 /* ===== Summary Card ===== */
 .summary-card {
+  position: relative;
   margin: 24rpx 24rpx 0;
   background: #ffffff;
   border-radius: 28rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 24rpx rgba(111, 207, 151, 0.08);
   animation: fade-up 0.4s ease-out both;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.backfill-btn-corner {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdf4;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.backfill-btn-corner .backfill-icon {
+  font-size: 32rpx;
 }
 
 .summary-row {
@@ -141,6 +182,7 @@
   margin-bottom: 24rpx;
   padding-bottom: 24rpx;
   border-bottom: 1rpx solid #f0f2f5;
+  flex: 1;
 }
 
 .sub-row {
@@ -175,6 +217,20 @@
 
 .summary-value.remain {
   color: #6FCF97;
+}
+
+.summary-value.income {
+  color: #52C41A;
+}
+
+.summary-value.balance {
+  color: #1890FF;
+}
+
+.income-row {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx dashed #e2e8f0;
 }
 
 .summary-divider {
@@ -371,3 +427,161 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.backfill-btn-active {
+  opacity: 0.85;
+  transform: scale(0.95);
+}
+
+.backfill-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.backfill-text {
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 1;
+}
+.calendar-btn-container {
+  padding: 0 24rpx 16rpx;
+  background: #ffffff;
+}
+
+.calendar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 20rpx 32rpx;
+  background: #f0fdf4;
+  border-radius: 16rpx;
+  border: 2rpx solid #d1fae5;
+}
+
+.calendar-btn-active {
+  background: #d1fae5;
+  transform: scale(0.98);
+}
+
+.calendar-btn-icon {
+  font-size: 32rpx;
+}
+
+.calendar-btn-text {
+  font-size: 28rpx;
+  color: #059669;
+  font-weight: 500;
+}
+
+/* ===== Calendar Modal ===== */
+.calendar-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.calendar-modal--show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.calendar-modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.calendar-modal-content {
+  position: relative;
+  width: 680rpx;
+  background: #ffffff;
+  border-radius: 32rpx;
+  overflow: hidden;
+  transform: scale(0.92) translateY(30rpx);
+  transition: transform 0.3s ease;
+}
+
+.calendar-modal--show .calendar-modal-content {
+  transform: scale(1) translateY(0);
+}
+
+.calendar-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx 20rpx;
+}
+
+.calendar-modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.calendar-modal-close {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #64748B;
+}
+
+.calendar-modal-footer {
+  padding: 16rpx 32rpx 24rpx;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.calendar-nav-btns {
+  display: flex;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.calendar-nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  background: #f1f5f9;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #64748B;
+  transition: all 0.2s;
+}
+
+.calendar-nav-btn:active {
+  background: #e2e8f0;
+}
+
+.backfill-btn-active {
+  opacity: 0.85;
+  transform: scale(0.95);
+}
+
+.backfill-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.backfill-text {
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 1;
+}
+

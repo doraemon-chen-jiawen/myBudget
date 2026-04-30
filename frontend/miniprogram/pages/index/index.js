@@ -46,12 +46,15 @@ Page({
       { x: 55, y: 38, r: -12, s: 0.85, z: 4 },
       { x: 40, y: 15, r: -8, s: 0.8, z: 5 }
     ],
-    // "其他"项的模态框
     showOtherModal: false,
     otherForm: { amount: "", note: "", selectedCategory: null },
-    // 可选分类数据
     monthlyCategories: [],
-    yearlyCategories: []
+    yearlyCategories: [],
+    // 收入登记相关
+    showIncomeModal: false,
+    incomeCategories: [],
+    incomeForm: { categoryKey: "", label: "", amount: "", note: "" },
+    selectedIncomeCategory: null
   },
 
   onLoad() {
@@ -65,7 +68,7 @@ Page({
       day: `${now.getDate()}`.padStart(2, "0"),
       weekday: weekdays[now.getDay()]
     });
-    this.loadUserFamilies();
+    // this.loadUserFamilies();
   },
 
   async loadUserFamilies() {
@@ -114,16 +117,16 @@ Page({
   async runAutoFillAndRefresh() {
     const today = formatDate();
 
-    try {
-      await request({
-        url: "/auto-fill/run",
-        method: "POST",
-        data: this.buildUserPayload(),
-        loadingTitle: "自动补记中"
-      });
-    } catch (error) {
-      // 自动补记失败时仍尝试刷新首页数据，避免页面空白。
-    }
+    // try {
+    //   await request({
+    //     url: "/auto-fill/run",
+    //     method: "POST",
+    //     data: this.buildUserPayload(),
+    //     loadingTitle: "自动补记中"
+    //   });
+    // } catch (error) {
+    //   // 自动补记失败时仍尝试刷新首页数据，避免页面空白。
+    // }
 
     await this.refreshTodayData(today);
   },
@@ -418,6 +421,115 @@ Page({
       this.updateTreasure();
     } catch (error) {
       // 错误提示已在 request 内统一处理。
+    }
+  },
+
+  // ---------- 收入登记 ----------
+
+  async onOpenIncomeModal() {
+    const userId = Number(wx.getStorageSync("userId"));
+    if (!userId) {
+      wx.showToast({ title: "请先登录", icon: "none" });
+      return;
+    }
+
+    try {
+      const categories = await request({
+        url: "/income-categories",
+        method: "GET",
+        data: { userId },
+        silent: true
+      });
+
+      this.setData({
+        showIncomeModal: true,
+        incomeCategories: categories || [],
+        incomeForm: { categoryKey: "", label: "", amount: "", note: "" },
+        selectedIncomeCategory: null
+      });
+    } catch (error) {
+      console.error("加载收入分类失败:", error);
+      wx.showToast({ title: "加载失败", icon: "none" });
+    }
+  },
+
+  onCloseIncomeModal() {
+    this.setData({
+      showIncomeModal: false,
+      incomeForm: { categoryKey: "", label: "", amount: "", note: "" },
+      selectedIncomeCategory: null
+    });
+  },
+
+  onSelectIncomeCategory(e) {
+    const dataset = e.currentTarget.dataset;
+    const category = {
+      key: dataset.key,
+      label: dataset.label,
+      icon: dataset.icon || "💰",
+      defaultAmount: Number(dataset.defaultAmount) || 0
+    };
+
+    this.setData({
+      selectedIncomeCategory: category,
+      incomeForm: {
+        ...this.data.incomeForm,
+        categoryKey: category.key,
+        label: category.label,
+        amount: category.defaultAmount > 0 ? category.defaultAmount.toString() : ""
+      }
+    });
+  },
+
+  onIncomeFormInput(e) {
+    const { field } = e.currentTarget.dataset;
+    this.setData({ [`incomeForm.${field}`]: e.detail.value });
+  },
+
+  async onSaveIncomeRecord() {
+    const { incomeForm, selectedIncomeCategory } = this.data;
+    const amount = Number(incomeForm.amount);
+    const note = incomeForm.note?.trim();
+
+    if (!selectedIncomeCategory) {
+      wx.showToast({ title: "请先选择收入分类", icon: "none" });
+      return;
+    }
+
+    if (!amount || amount <= 0) {
+      wx.showToast({ title: "请输入有效金额", icon: "none" });
+      return;
+    }
+
+    const userId = Number(wx.getStorageSync("userId"));
+    const today = formatDate();
+
+    try {
+      await request({
+        url: "/records",
+        method: "POST",
+        data: {
+          userId,
+          amount,
+          recordType: "income",
+          category: selectedIncomeCategory.label,
+          note: note || "收入登记",
+          recordDate: today,
+          categoryKey: selectedIncomeCategory.key
+        },
+        loadingTitle: "登记中"
+      });
+
+      wx.showToast({
+        title: `已登记 ¥${amount}`,
+        icon: "success"
+      });
+
+      this.onCloseIncomeModal();
+      this.refreshTodayData(today);
+    } catch (error) {
+      console.error("收入登记失败:", error);
+      wx.showToast({ title: "登记失败", icon: "none" });
     }
   }
 });

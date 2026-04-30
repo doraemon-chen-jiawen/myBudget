@@ -284,6 +284,10 @@
   background: rgba(167, 139, 250, 0.12);
 }
 
+.icon-income {
+  background: rgba(111, 207, 151, 0.1);
+}
+
 .icon-help {
   background: rgba(74, 222, 128, 0.12);
 }

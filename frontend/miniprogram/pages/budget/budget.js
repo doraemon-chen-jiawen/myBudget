@@ -3,34 +3,29 @@ const { request } = require("../../utils/request");
 Page({
   data: {
     currentTab: "daily",
-    // All categories grouped by period_type (from API)
-    categories: { daily: [], monthly: [], finance_interest: [], yearly: [] },
-    // Current tab's category list (for template wx:for)
+    categories: { daily: [], monthly: [], yearly: [] },
     budgetCategories: [],
-    // Current tab's budget values (for template input binding)
     currentBudgetValues: {},
     budgetTotal: "0",
     dailyTotal: "0",
     monthlyTotal: "0",
+    yearlyTotal: "0",
     daysInMonth: 30,
+    remainingDays: 0,
+    remainingMonths: 0,
     dailyBudgets: {},
     monthlyBudgets: {},
-    financeBudgets: {},
     yearlyBudgets: {},
     budgetIds: {},
     loading: false,
-    // Edit modal
     showEditModal: false,
     editItem: null,
     editForm: { label: "", amount: "" },
-    // Add modal
     showAddModal: false,
     addForm: { key: "", label: "", amount: "" },
-    // Pending delete operations per tab
     pendingDeletes: {
       daily: {},
       monthly: {},
-      finance: {},
       yearly: {}
     }
   },
@@ -59,7 +54,7 @@ Page({
         silent: true
       });
 
-      const categories = { daily: [], monthly: [], finance_interest: [], yearly: [] };
+      const categories = { daily: [], monthly: [], yearly: [] };
       allCategories.forEach((cat, index) => {
         try {
 
@@ -75,8 +70,6 @@ Page({
         if (categories[pt]) {
           const mapped = this._mapCategory(cat);
           categories[pt].push(mapped);
-        } else {
-          console.warn(`【分类加载】未知的 period_type: ${pt}, 分类:`, cat);
         }
       });
 
@@ -104,16 +97,14 @@ Page({
   },
 
   _updateVisibleData() {
-    const { currentTab, categories, dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets } = this.data;
-    const periodType = currentTab === "finance" ? "finance_interest" : currentTab;
-    const list = categories[periodType] || [];
+    const { currentTab, categories, dailyBudgets, monthlyBudgets, yearlyBudgets } = this.data;
+    const list = categories[currentTab] || [];
     const values =
       currentTab === "daily" ? dailyBudgets :
       currentTab === "monthly" ? monthlyBudgets :
-      currentTab === "yearly" ? yearlyBudgets : financeBudgets;
+      yearlyBudgets;
 
     console.log('【更新可见数据】currentTab:', currentTab);
-    console.log('【更新可见数据】periodType:', periodType);
     console.log('【更新可见数据】list (budgetCategories):', list);
     console.log('【更新可见数据】list 长度:', list.length);
 
@@ -132,7 +123,10 @@ Page({
     if (currentTab === "monthly") {
       budgetTotal = monthlySum + dailySum * daysInMonth;
     } else if (currentTab === "yearly") {
-      budgetTotal = yearlySum;
+      // 年度总预算 = 日预算 × 剩余天数 + 月预算 × 剩余月数 + 年预算
+      const remainingDays = this._getRemainingDaysInYear();
+      const remainingMonths = this._getRemainingMonthsInYear();
+      budgetTotal = dailySum * remainingDays + monthlySum * remainingMonths + yearlySum;
     }
 
     const fmt = (n) => n % 1 === 0 ? String(n) : n.toFixed(2);
@@ -147,10 +141,29 @@ Page({
       dailyTotal: fmt(dailySum),
       monthlyTotal: fmt(monthlySum),
       yearlyTotal: fmt(yearlySum),
-      daysInMonth
+      daysInMonth,
+      remainingDays: this._getRemainingDaysInYear(),
+      remainingMonths: this._getRemainingMonthsInYear()
     });
 
     console.log('【更新可见数据】设置完成');
+  },
+
+  // 计算从今天到年底还剩多少天
+  _getRemainingDaysInYear() {
+    const now = new Date();
+    const endOfYear = new Date(now.getFullYear(), 11, 31);
+    const diffTime = endOfYear - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  },
+
+  // 计算从本月到年底还剩多少个月（包括本月）
+  _getRemainingMonthsInYear() {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const remainingMonths = 12 - currentMonth;
+    return remainingMonths;
   },
 
   _sumByKeys(values, keySet) {
@@ -175,33 +188,18 @@ Page({
     try {
       this.setData({ loading: true });
 
-      // Auto-create defaults for daily, monthly and yearly
-      for (const pt of ["daily", "monthly", "yearly"]) {
-        try {
-          await request({
-            url: "/budgets/initialize-defaults",
-            method: "POST",
-            data: { userId, periodType: pt },
-            showLoading: false,
-            silent: true
-          });
-        } catch (_) { /* already initialized is fine */ }
-      }
-
       const now = new Date();
       const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
       const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-      const [dailyData, monthlyData, financeData, yearlyData] = await Promise.all([
+      const [dailyData, monthlyData, yearlyData] = await Promise.all([
         request({ url: "/budgets", method: "GET", data: { userId, periodType: "daily" } }),
         request({ url: "/budgets", method: "GET", data: { userId, periodType: "monthly" } }),
-        request({ url: "/budgets", method: "GET", data: { userId, periodType: "finance_interest" } }),
         request({ url: "/budgets", method: "GET", data: { userId, periodType: "yearly" } })
       ]);
 
       const dailyBudgets = {};
       const monthlyBudgets = {};
-      const financeBudgets = {};
       const yearlyBudgets = {};
       const budgetIds = {};
 
@@ -221,11 +219,6 @@ Page({
         monthlyBudgets[key] = item.planned_amount;
         budgetIds[`monthly_${key}`] = item.id;
       });
-      financeData.forEach(item => {
-        const key = parseKey(item.period_key);
-        financeBudgets[key] = item.planned_amount;
-        budgetIds[`finance_${key}`] = item.id;
-      });
       yearlyData.forEach(item => {
         const key = parseKey(item.period_key);
         yearlyBudgets[key] = item.planned_amount;
@@ -233,9 +226,9 @@ Page({
       });
 
       this.setData({
-        dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds,
+        dailyBudgets, monthlyBudgets, yearlyBudgets, budgetIds,
         loading: false,
-        pendingDeletes: { daily: {}, monthly: {}, finance: {}, yearly: {} }
+        pendingDeletes: { daily: {}, monthly: {}, yearly: {} }
       });
       this._updateVisibleData();
     } catch (error) {
@@ -262,8 +255,7 @@ Page({
     const budgets =
       type === "daily" ? "dailyBudgets" :
       type === "monthly" ? "monthlyBudgets" :
-      type === "yearly" ? "yearlyBudgets" :
-      "financeBudgets";
+      "yearlyBudgets";
     this.setData({
       [`${budgets}.${category}`]: value,
       [`currentBudgetValues.${category}`]: value
@@ -277,8 +269,7 @@ Page({
     const budgets =
       type === "daily" ? "dailyBudgets" :
       type === "monthly" ? "monthlyBudgets" :
-      type === "yearly" ? "yearlyBudgets" :
-      "financeBudgets";
+      "yearlyBudgets";
     this.setData({
       [`${budgets}.${category}`]: amount,
       [`currentBudgetValues.${category}`]: amount
@@ -303,15 +294,21 @@ Page({
       monthlySum = this._sumByKeys(monthlyBudgets, validKeys(categories.monthly || []));
       total = monthlySum + dailySum * daysInMonth;
     } else if (currentTab === "yearly") {
+      dailySum = this._sumByKeys(dailyBudgets, validKeys(categories.daily || []));
+      monthlySum = this._sumByKeys(monthlyBudgets, validKeys(categories.monthly || []));
       yearlySum = tabSum;
-      total = yearlySum;
+      const remainingDays = this._getRemainingDaysInYear();
+      const remainingMonths = this._getRemainingMonthsInYear();
+      total = dailySum * remainingDays + monthlySum * remainingMonths + yearlySum;
     }
     const fmt = (n) => n % 1 === 0 ? String(n) : n.toFixed(2);
     this.setData({
       budgetTotal: fmt(total),
       dailyTotal: fmt(dailySum),
       monthlyTotal: fmt(monthlySum),
-      yearlyTotal: fmt(yearlySum)
+      yearlyTotal: fmt(yearlySum),
+      remainingDays: this._getRemainingDaysInYear(),
+      remainingMonths: this._getRemainingMonthsInYear()
     });
   },
 
@@ -365,7 +362,7 @@ Page({
       }
 
       // Update budget amount
-      if (editForm.amount && currentTab !== "finance") {
+      if (editForm.amount) {
         const budgetKey = `${currentTab}_${editItem.key}`;
         const budgetId = this.data.budgetIds[budgetKey];
 
@@ -384,7 +381,7 @@ Page({
               periodKey: budgetKey,
               plannedAmount: Number(editForm.amount),
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetMonth: currentTab === "monthly" ? monthKey : undefined,
               budgetYear: currentTab === "yearly" ? yearKey : undefined
             }
           });
@@ -397,7 +394,7 @@ Page({
               periodType: currentTab,
               periodKey: `${currentTab}_${editItem.key}`,
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetMonth: currentTab === "monthly" ? monthKey : undefined,
               budgetYear: currentTab === "yearly" ? yearKey : undefined,
               plannedAmount: Number(editForm.amount)
             }
@@ -432,7 +429,6 @@ Page({
       confirmColor: "#FF6B6B",
       success: (res) => {
         if (res.confirm) {
-          // Add to pending deletes for current tab
           const pendingDeletes = this.data.pendingDeletes || {};
           pendingDeletes[currentTab] = pendingDeletes[currentTab] || {};
           pendingDeletes[currentTab][category] = {
@@ -440,12 +436,10 @@ Page({
             budgetId: budgetId
           };
 
-          // Clear budget value locally
           const budgetsKey =
             currentTab === "daily" ? "dailyBudgets" :
             currentTab === "monthly" ? "monthlyBudgets" :
-            currentTab === "yearly" ? "yearlyBudgets" :
-            "financeBudgets";
+            "yearlyBudgets";
 
           this.setData({
             pendingDeletes,
@@ -464,10 +458,6 @@ Page({
   // ---------- Add ----------
 
   onOpenAddModal() {
-    if (this.data.currentTab === "finance") {
-      wx.showToast({ title: "理财预算暂不支持添加自定义分类", icon: "none" });
-      return;
-    }
     this.setData({
       showAddModal: true,
       addForm: { key: "", label: "", amount: "" }
@@ -523,7 +513,7 @@ Page({
             periodType,
             periodKey: `${periodType}_${newCat.category_key}`,
             budgetDate: periodType === "daily" ? today : undefined,
-            budgetMonth: (periodType === "monthly" || periodType === "finance_interest") ? monthKey : undefined,
+            budgetMonth: periodType === "monthly" ? monthKey : undefined,
             budgetYear: periodType === "yearly" ? yearKey : undefined,
             plannedAmount: Number(addForm.amount)
           }
@@ -552,7 +542,7 @@ Page({
       return;
     }
 
-    const { currentTab, dailyBudgets, monthlyBudgets, financeBudgets, yearlyBudgets, budgetIds, pendingDeletes } = this.data;
+    const { currentTab, dailyBudgets, monthlyBudgets, yearlyBudgets, budgetIds, pendingDeletes } = this.data;
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -561,7 +551,6 @@ Page({
     try {
       this.setData({ loading: true });
 
-      // First, execute pending deletes for current tab only
       const currentPendingDeletes = pendingDeletes[currentTab] || {};
       for (const [key, deleteInfo] of Object.entries(currentPendingDeletes)) {
         if (deleteInfo.budgetId) {
@@ -588,24 +577,19 @@ Page({
         }
       }
 
-      // Clear pending deletes for current tab after processing
       const newPendingDeletes = { ...pendingDeletes };
       delete newPendingDeletes[currentTab];
 
-      // Then save/update budget values
       let budgets, periodType;
       if (currentTab === "daily") { budgets = dailyBudgets; periodType = "daily"; }
       else if (currentTab === "monthly") { budgets = monthlyBudgets; periodType = "monthly"; }
-      else if (currentTab === "yearly") { budgets = yearlyBudgets; periodType = "yearly"; }
-      else { budgets = financeBudgets; periodType = "finance_interest"; }
+      else { budgets = yearlyBudgets; periodType = "yearly"; }
 
       for (const [key, amount] of Object.entries(budgets)) {
         if (!amount) continue;
 
         const budgetKey = `${currentTab}_${key}`;
         const budgetId = budgetIds[budgetKey];
-
-        if (currentTab === "finance" && !budgetId) continue;
 
         const periodKey = `${currentTab}_${key}`;
 
@@ -617,7 +601,7 @@ Page({
               userId, periodType, periodKey,
               plannedAmount: Number(amount),
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetMonth: currentTab === "monthly" ? monthKey : undefined,
               budgetYear: currentTab === "yearly" ? yearKey : undefined
             }
           });
@@ -628,7 +612,7 @@ Page({
             data: {
               userId, periodType, periodKey,
               budgetDate: currentTab === "daily" ? today : undefined,
-              budgetMonth: (currentTab === "monthly" || currentTab === "finance") ? monthKey : undefined,
+              budgetMonth: currentTab === "monthly" ? monthKey : undefined,
               budgetYear: currentTab === "yearly" ? yearKey : undefined,
               plannedAmount: Number(amount)
             }

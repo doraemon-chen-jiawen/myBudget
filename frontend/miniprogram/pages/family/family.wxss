@@ -324,7 +324,7 @@
 }
 
 .form-input {
-  width: 100%;
+  /* width: 100%; */
   padding: 20rpx;
   background: #f8f9fa;
   border-radius: 8rpx;

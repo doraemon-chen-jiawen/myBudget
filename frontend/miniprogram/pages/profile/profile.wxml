@@ -74,6 +74,19 @@
         </view>
         <text class="arrow-icon">›</text>
       </view>
+
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToIncome">
+        <view class="menu-left">
+          <view class="icon-box icon-income">
+            <text class="icon-emoji">💵</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">收入管理</text>
+            <text class="menu-subtitle">管理月度/年度收入预算</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
     </view>
   </view>
 

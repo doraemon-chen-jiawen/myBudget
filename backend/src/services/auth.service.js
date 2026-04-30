@@ -1,6 +1,7 @@
 const AppError = require("../utils/app-error");
 const { upsertByWechatOpenid, findByUsernameWithPassword, createUserWithPassword, findByUsername } = require("../dao/users.dao");
 const bcrypt = require("bcrypt");
+const budgetsService = require("./budgets.service");
 
 function normalizeOptionalString(v) {
   return typeof v === "string" ? v.trim() : undefined;
@@ -103,6 +104,15 @@ async function registerUser(payload) {
     nickname: nickname?.trim() || trimmedUsername,
     avatarUrl: generateDefaultAvatar()
   });
+
+  // Initialize default budgets for the new user
+  try {
+    for (const periodType of ["daily", "monthly", "yearly"]) {
+      await budgetsService.ensureDefaultBudgets(user.id, periodType);
+    }
+  } catch (error) {
+    console.error("Failed to initialize default budgets for user:", user.id, error);
+  }
 
   return {
     userId: user.id,

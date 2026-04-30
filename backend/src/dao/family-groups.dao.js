@@ -39,10 +39,16 @@ async function getGroup(id) {
   return rows[0] || null;
 }
 
-async function listGroups({ ownerUserId } = {}) {
+async function listGroups({ ownerUserId, userId } = {}) {
   let sql = "SELECT * FROM family_groups";
   const params = [];
-  if (ownerUserId) {
+  if (userId) {
+    sql += ` WHERE id IN (
+      SELECT family_group_id FROM family_members
+      WHERE user_id = ? AND status = 'active'
+    )`;
+    params.push(userId);
+  } else if (ownerUserId) {
     sql += " WHERE owner_user_id = ?";
     params.push(ownerUserId);
   }

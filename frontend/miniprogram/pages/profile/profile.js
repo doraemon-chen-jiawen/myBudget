@@ -170,5 +170,11 @@ Page({
     wx.navigateTo({
       url: "/pages/statistics/statistics"
     });
+  },
+
+  onNavigateToIncome() {
+    wx.navigateTo({
+      url: "/pages/income/income"
+    });
   }
 });

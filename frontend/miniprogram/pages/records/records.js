@@ -73,6 +73,7 @@ Page({
         id: r.id,
         category: r.category_snapshot || "未分类",
         amount: Number(r.amount || 0).toFixed(2),
+        displayAmount: r.record_type === "expense" ? `-${Number(r.amount || 0).toFixed(2)}` : Number(r.amount || 0).toFixed(2),
         type: r.record_type || r.recordType,
         note: r.note || "",
         source: r.source || "",
@@ -98,7 +99,7 @@ Page({
         if (usedIds.has(item.id)) continue;
 
         if (item.source === "retract" && item.sourceReference) {
-          // 对冲记录：只标记原记录为已撤回，对冲记录本身不显示
+          // 撤回记录：只标记原记录为已撤回，撤回记录本身不显示
           const originalItem = g.items.find(i => String(i.id) === String(item.sourceReference));
           if (originalItem && !usedIds.has(originalItem.id)) {
             reorderedItems.push({ ...originalItem, isRetracted: true });
@@ -222,7 +223,7 @@ Page({
 
     wx.showModal({
       title: "确认撤回",
-      content: `将新增一条对冲记录：¥${amount}`,
+      content: `将新增一条撤回记录：¥${amount}`,
       confirmText: "确认",
       cancelText: "取消",
       success: async (res) => {

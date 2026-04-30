@@ -139,7 +139,7 @@ CREATE TABLE frequent_items (
 CREATE TABLE budget_categories (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id       BIGINT UNSIGNED DEFAULT NULL          COMMENT 'NULL = system default category',
-  period_type   ENUM('daily','monthly','finance_interest','yearly') NOT NULL,
+  period_type   ENUM('daily','monthly','yearly') NOT NULL,
   category_key  VARCHAR(64)  NOT NULL,
   label         VARCHAR(64)  NOT NULL,
   icon          VARCHAR(16)  NOT NULL DEFAULT '✨',
@@ -214,7 +214,7 @@ CREATE TABLE budgets (
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
 
-  period_type ENUM('daily','monthly','finance_interest','yearly') NOT NULL,
+  period_type ENUM('daily','monthly','yearly') NOT NULL,
   period_key VARCHAR(100) NOT NULL,
 
   budget_date DATE DEFAULT NULL,
@@ -225,13 +225,6 @@ CREATE TABLE budgets (
 
   -- daily/monthly/yearly
   planned_amount DECIMAL(12,2) DEFAULT NULL,
-
-  -- finance_interest
-  planned_annual_rate DECIMAL(8,4) DEFAULT NULL,
-  planned_principal_amount DECIMAL(14,2) DEFAULT NULL,
-
-  planned_interest_amount DECIMAL(12,2) GENERATED ALWAYS AS
-    (planned_principal_amount * planned_annual_rate / 12) STORED,
 
   note VARCHAR(255) DEFAULT NULL,
 
@@ -263,28 +256,18 @@ CREATE TABLE budgets (
       (period_type='daily'
         AND budget_date IS NOT NULL AND budget_month IS NULL AND budget_year IS NULL AND account_id IS NULL
         AND planned_amount IS NOT NULL
-        AND planned_annual_rate IS NULL AND planned_principal_amount IS NULL
       )
       OR
       -- monthly
       (period_type='monthly'
         AND budget_month IS NOT NULL AND budget_date IS NULL AND budget_year IS NULL AND account_id IS NULL
         AND planned_amount IS NOT NULL
-        AND planned_annual_rate IS NULL AND planned_principal_amount IS NULL
-      )
-      OR
-      -- finance_interest
-      (period_type='finance_interest'
-        AND budget_month IS NOT NULL AND budget_date IS NULL AND budget_year IS NULL AND account_id IS NOT NULL
-        AND planned_amount IS NULL
-        AND planned_annual_rate IS NOT NULL AND planned_principal_amount IS NOT NULL
       )
       OR
       -- yearly
       (period_type='yearly'
         AND budget_year IS NOT NULL AND budget_date IS NULL AND budget_month IS NULL AND account_id IS NULL
         AND planned_amount IS NOT NULL
-        AND planned_annual_rate IS NULL AND planned_principal_amount IS NULL
       )
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -383,7 +366,7 @@ CREATE TABLE auto_fill_logs (
   user_id BIGINT UNSIGNED NOT NULL,
   family_group_id BIGINT UNSIGNED DEFAULT NULL,
   rule_name VARCHAR(128) NOT NULL,
-  period_type ENUM('daily','monthly','finance_interest') NOT NULL,
+  period_type ENUM('daily','monthly') NOT NULL,
   period_key VARCHAR(10) NOT NULL,
   target_date DATE DEFAULT NULL,
   target_month CHAR(7) DEFAULT NULL,
@@ -429,49 +412,13 @@ CREATE TRIGGER trg_budgets_bi
 BEFORE INSERT ON budgets
 FOR EACH ROW
 BEGIN
-  DECLARE v_kind VARCHAR(16);
-
-  IF NEW.period_type = 'finance_interest' THEN
-    SET NEW.account_scope_id = NEW.account_id;
-  ELSE
-    SET NEW.account_scope_id = 0;
-  END IF;
-
-  IF NEW.period_type = 'finance_interest' THEN
-    SELECT account_kind INTO v_kind
-    FROM accounts
-    WHERE id = NEW.account_id
-    LIMIT 1;
-
-    IF v_kind IS NULL OR v_kind <> 'finance' THEN
-      SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'budgets.finance_interest requires accounts.account_kind=finance';
-    END IF;
-  END IF;
+  SET NEW.account_scope_id = 0;
 END$$
 
 CREATE TRIGGER trg_budgets_bu
 BEFORE UPDATE ON budgets
 FOR EACH ROW
 BEGIN
-  DECLARE v_kind VARCHAR(16);
-
-  IF NEW.period_type = 'finance_interest' THEN
-    SET NEW.account_scope_id = NEW.account_id;
-  ELSE
-    SET NEW.account_scope_id = 0;
-  END IF;
-
-  IF NEW.period_type = 'finance_interest' THEN
-    SELECT account_kind INTO v_kind
-    FROM accounts
-    WHERE id = NEW.account_id
-    LIMIT 1;
-
-    IF v_kind IS NULL OR v_kind <> 'finance' THEN
-      SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'budgets.finance_interest requires accounts.account_kind=finance';
-    END IF;
-  END IF;
+  SET NEW.account_scope_id = 0;
 END$$
 DELIMITER ;

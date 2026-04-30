@@ -1,0 +1,24 @@
+<view class="calendar-container">
+  <view class="calendar-header">
+    <view class="week-day" wx:for="{{weekDays}}" wx:key="index">{{item}}</view>
+  </view>
+  <view class="calendar-body">
+    <view
+      class="calendar-day {{getDayClass(item)}}"
+      wx:for="{{calendarDays}}"
+      wx:key="date"
+      data-day="{{item.day}}"
+      data-date="{{item.date}}"
+      data-amount="{{item.amount}}"
+      data-budget="{{item.budget}}"
+      data-status="{{item.status}}"
+      bindtap="onDayTap"
+    >
+      <view class="day-number" wx:if="{{item.day}}">{{item.day}}</view>
+      <view class="day-dot" wx:if="{{item.day && item.hasRecord}}">
+        <view class="dot {{item.status === 'over' ? 'dot-red' : (item.status === 'warning' ? 'dot-yellow' : 'dot-green')}}"></view>
+      </view>
+      <view class="day-dot-empty" wx:if="{{item.day && !item.hasRecord}}"></view>
+    </view>
+  </view>
+</view>

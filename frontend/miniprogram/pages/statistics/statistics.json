@@ -2,5 +2,9 @@
   "navigationBarTitleText": "统计分析",
   "navigationBarBackgroundColor": "#ffffff",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#F7F9FB"
+  "backgroundColor": "#F7F9FB",
+  "usingComponents": {
+    "calendar-view": "/components/calendar-view/calendar-view",
+    "bar-chart": "/components/bar-chart/bar-chart"
+  }
 }

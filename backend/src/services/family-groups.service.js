@@ -20,7 +20,10 @@ async function create(payload) {
   });
 }
 
-async function list({ ownerUserId } = {}) {
+async function list({ ownerUserId, userId } = {}) {
+  if (userId !== undefined && userId !== null) {
+    return dao.listGroups({ userId: Number(userId) });
+  }
   if (ownerUserId !== undefined && ownerUserId !== null) {
     return dao.listGroups({ ownerUserId: Number(ownerUserId) });
   }

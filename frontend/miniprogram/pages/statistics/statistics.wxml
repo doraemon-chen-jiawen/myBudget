@@ -12,10 +12,12 @@
   </view>
 
   <!-- Date nav -->
-  <view class="date-nav">
-    <view class="date-arrow" hover-class="date-arrow-active" bindtap="onPrevDate">‹</view>
-    <text class="date-text">{{periodLabel || currentDate}}</text>
-    <view class="date-arrow" hover-class="date-arrow-active" bindtap="onNextDate">›</view>
+  <view class="date-nav-container">
+    <view class="date-nav">
+      <view class="date-arrow" hover-class="date-arrow-active" bindtap="onPrevDate">‹</view>
+      <text class="date-text {{dimension === 'day' ? 'date-text-clickable' : ''}}" bindtap="onOpenCalendarPicker">{{dateLabel || currentDate}}</text>
+      <view class="date-arrow" hover-class="date-arrow-active" bindtap="onNextDate">›</view>
+    </view>
   </view>
 
   <!-- Family member selector -->
@@ -36,10 +38,15 @@
 
   <!-- Summary card -->
   <view class="summary-card">
-    <view class="summary-row main-row">
-      <view class="summary-block">
-        <text class="summary-label">预算总额</text>
-        <text class="summary-value budget">¥{{summary.budgetTotal}}</text>
+    <view class="summary-card-header">
+      <view class="summary-row main-row">
+        <view class="summary-block">
+          <text class="summary-label">预算总额</text>
+          <text class="summary-value budget">¥{{summary.budgetTotal}}</text>
+        </view>
+      </view>
+      <view class="backfill-btn-corner" hover-class="backfill-btn-active" bindtap="onNavigateToBackfill">
+        <text class="backfill-icon">📝</text>
       </view>
     </view>
     <view class="summary-row sub-row">
@@ -49,8 +56,19 @@
       </view>
       <view class="summary-divider"></view>
       <view class="summary-block">
+        <text class="summary-label">实际收入</text>
+        <text class="summary-value income">¥{{summary.incomeTotal}}</text>
+      </view>
+    </view>
+    <view class="summary-row sub-row income-row">
+      <view class="summary-block">
         <text class="summary-label">剩余预算</text>
         <text class="summary-value remain">¥{{summary.remainTotal}}</text>
+      </view>
+      <view class="summary-divider"></view>
+      <view class="summary-block">
+        <text class="summary-label">结余</text>
+        <text class="summary-value balance">¥{{summary.balanceTotal}}</text>
       </view>
     </view>
     <!-- Overall progress -->
@@ -61,6 +79,39 @@
       <text class="progress-label">总预算使用 {{overallPercent}}%</text>
     </view>
   </view>
+
+  <!-- Calendar modal (day dimension) -->
+  <view class="calendar-modal {{showCalendarPicker ? 'calendar-modal--show' : ''}}" wx:if="{{showCalendarPicker}}">
+    <view class="calendar-modal-mask" bindtap="onCloseCalendarPicker"></view>
+    <view class="calendar-modal-content">
+      <view class="calendar-modal-header">
+        <text class="calendar-modal-title">{{calendarYear}}年{{calendarMonth}}月</text>
+        <view class="calendar-modal-close" bindtap="onCloseCalendarPicker">✕</view>
+      </view>
+      <calendar-view
+        year="{{calendarYear}}"
+        month="{{calendarMonth}}"
+        dailyData="{{calendarData}}"
+        dailyBudget="{{dailyBudget}}"
+        bind:daytap="onCalendarDayTap"
+      />
+      <view class="calendar-modal-footer">
+        <view class="calendar-nav-btns">
+          <view class="calendar-nav-btn" bindtap="onPrevCalendarMonth">‹ 上月</view>
+          <view class="calendar-nav-btn" bindtap="onNextCalendarMonth">下月 ›</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Bar chart view (year dimension) -->
+  <bar-chart
+    wx:if="{{dimension === 'year' && showBarChart}}"
+    year="{{barChartYear}}"
+    monthlyData="{{barChartData}}"
+    maxAmount="{{barChartMaxAmount}}"
+    bind:bartap="onBarChartTap"
+  />
 
   <!-- Category breakdown -->
   <view class="section-header">

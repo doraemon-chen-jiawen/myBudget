@@ -2,18 +2,19 @@
   <view class="page-header">
     <view class="header-deco"></view>
     <view class="header-total">
-      <text class="total-label">{{currentTab === 'daily' ? '每日' : currentTab === 'monthly' ? '每月' : currentTab === 'yearly' ? '年度' : '理财'}}预算总额</text>
+      <text class="total-label">{{currentTab === 'daily' ? '每日' : currentTab === 'monthly' ? '每月' : '年度'}}预算总额</text>
       <view class="total-amount-row">
         <text class="total-currency">¥</text>
         <text class="total-amount">{{budgetTotal}}</text>
       </view>
       <text class="total-breakdown" wx:if="{{currentTab === 'monthly'}}">每日 ¥{{dailyTotal}} × {{daysInMonth}}天 + 月度项 ¥{{monthlyTotal}}</text>
+      <text class="total-breakdown" wx:if="{{currentTab === 'yearly'}}">日¥{{dailyTotal}}×剩余{{remainingDays}}天 + 月¥{{monthlyTotal}}×剩余{{remainingMonths}}月 + 年度项¥{{yearlyTotal}}</text>
     </view>
   </view>
 
   <view class="tabs-container">
     <view class="tabs">
-      <view class="tabs-indicator" style="transform: translateX({{currentTab === 'daily' ? '0' : currentTab === 'monthly' ? '100%' : currentTab === 'yearly' ? '200%' : '300%'}})"></view>
+      <view class="tabs-indicator" style="transform: translateX({{currentTab === 'daily' ? '0' : currentTab === 'monthly' ? '100%' : '200%'}})"></view>
       <view class="tab {{currentTab === 'daily' ? 'tab--active' : ''}}" data-tab="daily" bindtap="onTabChange">
         每日预算
       </view>
@@ -22,9 +23,6 @@
       </view>
       <view class="tab {{currentTab === 'yearly' ? 'tab--active' : ''}}" data-tab="yearly" bindtap="onTabChange">
         年度预算
-      </view>
-      <view class="tab {{currentTab === 'finance' ? 'tab--active' : ''}}" data-tab="finance" bindtap="onTabChange">
-        理财预算
       </view>
     </view>
   </view>
@@ -43,14 +41,8 @@
             <text class="pending-delete-tag" wx:if="{{pendingDeletes[currentTab][item.key]}}">待删除</text>
           </view>
           <view class="budget-actions">
-            <view class="action-btn action-btn--edit" data-category="{{item.key}}" bindtap="onEditBudget">
-              <text class="action-icon">✏️</text>
-            </view>
             <view class="action-btn action-btn--delete" data-category="{{item.key}}" bindtap="onDeleteBudget">
               <text class="action-icon">🗑️</text>
-            </view>
-            <view class="action-btn action-btn--delete-custom" wx:if="{{item.isCustom}}" data-category="{{item.key}}" bindtap="onDeleteCustomCategory">
-              <text class="action-icon">❌</text>
             </view>
           </view>
         </view>

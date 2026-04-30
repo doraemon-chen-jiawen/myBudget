@@ -1,0 +1,83 @@
+.bar-chart-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  margin: 24rpx;
+}
+
+.bar-chart-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1E293B;
+  text-align: center;
+  padding-bottom: 20rpx;
+}
+
+.bar-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300rpx;
+}
+
+.bar-chart-empty-text {
+  font-size: 28rpx;
+  color: #94A3B8;
+}
+
+.bar-chart-body {
+  display: flex;
+  align-items: flex-end;
+  height: 400rpx;
+  padding-top: 40rpx;
+  padding-bottom: 20rpx;
+}
+
+.bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 4rpx;
+}
+
+.bar-value {
+  font-size: 20rpx;
+  color: #64748B;
+  margin-bottom: 4rpx;
+  line-height: 1;
+}
+
+.bar {
+  width: 40rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  transition: height 0.3s;
+  min-height: 4rpx;
+}
+
+.bar-placeholder {
+  width: 40rpx;
+  height: 4rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  background: #E2E8F0;
+}
+
+.bar-label {
+  font-size: 18rpx;
+  color: #64748B;
+  margin-top: 8rpx;
+  line-height: 1;
+  min-width: 32rpx;
+  text-align: center;
+}
+
+.bar-label-empty {
+  height: 30rpx;
+  margin-top: 8rpx;
+}
+
+.bar-item:active {
+  opacity: 0.7;
+}

@@ -100,6 +100,7 @@ async function listUserFamilies(userId) {
 }
 
 module.exports = {
+  findById,
   upsertByWechatOpenid,
   findByWechatOpenid,
   findByUsername,

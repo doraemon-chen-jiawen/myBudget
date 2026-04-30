@@ -23,7 +23,17 @@
         </view>
         <!-- 正常：金元宝山 -->
         <block wx:else>
+          <!-- 金光光晕 -->
           <view class="treasure-glow"></view>
+          <!-- 浮动金粉粒子 -->
+          <view class="gold-particles">
+            <view class="particle p-1"></view>
+            <view class="particle p-2"></view>
+            <view class="particle p-3"></view>
+            <view class="particle p-4"></view>
+            <view class="particle p-5"></view>
+          </view>
+          <!-- 金元宝山 -->
           <view class="treasure-mountain">
             <view class="ingot" wx:for="{{ingots}}" wx:key="index"
               style="left:{{item.x}}rpx;top:{{item.y}}rpx;transform:rotate({{item.r}}deg) scale({{item.s}});z-index:{{item.z}};opacity:{{index < visibleIngots ? 1 : 0}}">
@@ -55,7 +65,7 @@
   </view>
 
   <!-- 家庭选择器 -->
-  <view class="family-selector" wx:if="{{familyGroups.length > 0}}">
+  <!-- <view class="family-selector" wx:if="{{familyGroups.length > 0}}">
     <view class="family-selector-header" bindtap="onToggleFamilySelector">
       <view class="family-selector-left">
         <view class="family-icon">🏠</view>
@@ -74,7 +84,7 @@
         <text>{{item.name}}</text>
       </view>
     </view>
-  </view>
+  </view> -->
 
   <!-- 统计卡片 -->
   <view class="summary-card">
@@ -134,8 +144,28 @@
           data-amount="{{item.currentAmount}}"
           data-isOther="{{item.isOther}}"
           bindtap="onTapQuickRecord"
-        >{{item.isOther ? '  + 自定义记账' : '记一笔'}}</button>
+          wx:if="{{!item.isOther}}"
+        >记一笔</button>
       </view>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮区域 -->
+  <view class="action-buttons-section">
+    <view class="section-header">
+      <view class="section-title-icon">📝</view>
+      <text class="section-title">更多操作</text>
+    </view>
+    <view class="action-btn-group">
+      <button class="action-btn action-btn--expense" hover-class="action-btn--active" bindtap="onTapQuickRecord" data-key="other" data-amount="0" data-isOther="true">
+        <text class="action-btn-icon">💰</text>
+        <text class="action-btn-text">自定义消费金额</text>
+      </button>
+      <view class="action-btn-divider"></view>
+      <button class="action-btn action-btn--income" hover-class="action-btn--active" bindtap="onOpenIncomeModal">
+        <text class="action-btn-icon">💵</text>
+        <text class="action-btn-text">收入登记</text>
+      </button>
     </view>
   </view>
 
@@ -147,7 +177,7 @@
   <view class="modal-overlay" wx:if="{{showOtherModal}}" bindtap="onCloseOtherModal">
     <view class="modal-content" catchtap>
       <view class="modal-header">
-        <text class="modal-title">自定义记账</text>
+        <text class="modal-title">自定义消费金额</text>
         <view class="modal-close" bindtap="onCloseOtherModal">✕</view>
       </view>
 
@@ -253,6 +283,67 @@
       <view class="modal-footer">
         <button class="modal-btn modal-btn--cancel" bindtap="onCloseOtherModal">取消</button>
         <button class="modal-btn modal-btn--confirm {{!otherForm.selectedCategory || !otherForm.amount ? 'disabled' : ''}}" bindtap="onSaveOtherRecord">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 收入登记模态框 -->
+  <view class="modal-overlay" wx:if="{{showIncomeModal}}" bindtap="onCloseIncomeModal">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">收入登记</text>
+        <view class="modal-close" bindtap="onCloseIncomeModal">✕</view>
+      </view>
+
+      <view class="modal-body">
+        <view class="category-group">
+          <text class="category-group-title">选择收入来源</text>
+          <view class="category-buttons">
+            <view
+              class="category-btn income-category-btn {{selectedIncomeCategory && selectedIncomeCategory.key === item.category_key ? 'active' : ''}}"
+              wx:for="{{incomeCategories}}"
+              wx:key="id"
+              data-key="{{item.category_key}}"
+              data-label="{{item.label}}"
+              data-icon="{{item.icon}}"
+              data-defaultAmount="{{item.default_amount}}"
+              bindtap="onSelectIncomeCategory"
+            >
+              <text class="category-btn-icon">{{item.icon || '💰'}}</text>
+              <text class="category-btn-text">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="form-section" wx:if="{{selectedIncomeCategory}}">
+          <view class="form-item">
+            <text class="form-label">金额 (元) <text class="required">*</text></text>
+            <input
+              class="form-input"
+              type="digit"
+              placeholder="请输入金额"
+              value="{{incomeForm.amount}}"
+              data-field="amount"
+              bindinput="onIncomeFormInput"
+            />
+          </view>
+          <view class="form-item">
+            <text class="form-label">备注 (可选)</text>
+            <input
+              class="form-input"
+              type="text"
+              placeholder="请输入备注"
+              value="{{incomeForm.note}}"
+              data-field="note"
+              bindinput="onIncomeFormInput"
+            />
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn--cancel" bindtap="onCloseIncomeModal">取消</button>
+        <button class="modal-btn modal-btn--confirm income-confirm-btn {{!selectedIncomeCategory || !incomeForm.amount ? 'disabled' : ''}}" bindtap="onSaveIncomeRecord">确定登记</button>
       </view>
     </view>
   </view>

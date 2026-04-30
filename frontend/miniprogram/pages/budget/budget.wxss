@@ -115,7 +115,7 @@
   position: absolute;
   top: 8rpx;
   left: 8rpx;
-  width: calc((100% - 20rpx) / 4);
+  width: calc((100% - 20rpx) / 3);
   height: calc(100% - 16rpx);
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   border-radius: var(--radius-pill);

@@ -1,0 +1,168 @@
+<view class="income-page">
+  <view class="page-header">
+    <view class="header-deco"></view>
+    <view class="header-total">
+      <text class="total-label">{{currentTab === 'monthly' ? '月度' : '年度'}}收入预算</text>
+      <view class="total-amount-row">
+        <text class="total-currency">¥</text>
+        <text class="total-amount income">{{budgetTotal}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tabs-container">
+    <view class="tabs">
+      <view class="tabs-indicator" style="transform: translateX({{currentTab === 'monthly' ? '0' : '100%'}})"></view>
+      <view class="tab {{currentTab === 'monthly' ? 'tab--active' : ''}}" data-tab="monthly" bindtap="onTabChange">
+        月度收入
+      </view>
+      <view class="tab {{currentTab === 'yearly' ? 'tab--active' : ''}}" data-tab="yearly" bindtap="onTabChange">
+        年度收入
+      </view>
+    </view>
+  </view>
+
+  <view class="budget-list">
+    <block wx:for="{{budgetCategories}}" wx:key="key" wx:for-item="item">
+      <view
+        class="budget-item {{pendingDeletes[currentTab][item.key] ? 'budget-item--pending-delete' : ''}}"
+        style="--item-color: #27AE60; --item-bg: rgba(39, 174, 96, 0.1); --item-color-light: rgba(39, 174, 96, 0.3)"
+      >
+        <view class="budget-header">
+          <view class="budget-icon">{{item.icon}}</view>
+          <view class="budget-label-group">
+            <text class="budget-label">{{item.label}}</text>
+            <text class="pending-delete-tag" wx:if="{{pendingDeletes[currentTab][item.key]}}">待删除</text>
+          </view>
+          <view class="budget-actions">
+            <view class="action-btn action-btn--edit" data-category="{{item.key}}" bindtap="onEditBudget">
+              <text class="action-icon">✏️</text>
+            </view>
+            <view class="action-btn action-btn--delete" data-category="{{item.key}}" bindtap="onDeleteBudget">
+              <text class="action-icon">🗑️</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="budget-input-wrapper {{pendingDeletes[currentTab][item.key] ? 'budget-input-wrapper--disabled' : ''}}">
+          <text class="currency-symbol">¥</text>
+          <input
+            class="budget-input"
+            type="digit"
+            placeholder="0"
+            placeholder-style="color: #CBD5E1"
+            value="{{currentBudgetValues[item.key]}}"
+            data-category="{{item.key}}"
+            bindinput="onBudgetInput"
+            disabled="{{pendingDeletes[currentTab][item.key]}}"
+          />
+        </view>
+
+      </view>
+    </block>
+
+    <view class="add-category-btn" hover-class="add-category-btn--active" bindtap="onOpenAddModal">
+      <text class="add-icon">+</text>
+      <text class="add-text">添加自定义收入分类</text>
+    </view>
+  </view>
+
+  <view class="action-buttons">
+    <button class="btn btn--secondary" hover-class="btn--secondary-active" bindtap="onResetBudgets">重置</button>
+    <button class="btn btn--primary" hover-class="btn--primary-active" bindtap="onSaveBudgets">保存预算</button>
+  </view>
+
+  <!-- 编辑模态框 -->
+  <view class="modal {{showEditModal ? 'modal--show' : ''}}" wx:if="{{showEditModal}}">
+    <view class="modal-mask" bindtap="onCloseEditModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">编辑收入预算</text>
+        <view class="modal-close" hover-class="modal-close--active" bindtap="onCloseEditModal">
+          <text class="close-icon">✕</text>
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">分类名称</text>
+          <input
+            class="form-input"
+            placeholder="请输入分类名称"
+            placeholder-style="color: #b8c4ce"
+            value="{{editForm.label}}"
+            data-field="label"
+            bindinput="onEditFormInput"
+          />
+        </view>
+        <view class="form-item">
+          <text class="form-label">预算金额</text>
+          <view class="form-input-wrapper">
+            <text class="form-currency">¥</text>
+            <input
+              class="form-input"
+              type="digit"
+              placeholder="请输入金额"
+              placeholder-style="color: #b8c4ce"
+              value="{{editForm.amount}}"
+              data-field="amount"
+              bindinput="onEditFormInput"
+            />
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn--secondary" hover-class="modal-btn--secondary-active" bindtap="onCloseEditModal">取消</button>
+        <button class="modal-btn modal-btn--primary" hover-class="modal-btn--primary-active" bindtap="onSaveEdit">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加模态框 -->
+  <view class="modal {{showAddModal ? 'modal--show' : ''}}" wx:if="{{showAddModal}}">
+    <view class="modal-mask" bindtap="onCloseAddModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">添加收入分类</text>
+        <view class="modal-close" hover-class="modal-close--active" bindtap="onCloseAddModal">
+          <text class="close-icon">✕</text>
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">分类名称</text>
+          <input
+            class="form-input"
+            placeholder="请输入分类名称"
+            placeholder-style="color: #b8c4ce"
+            value="{{addForm.label}}"
+            data-field="label"
+            bindinput="onAddFormInput"
+          />
+        </view>
+        <view class="form-item">
+          <text class="form-label">预算金额（可选）</text>
+          <view class="form-input-wrapper">
+            <text class="form-currency">¥</text>
+            <input
+              class="form-input"
+              type="digit"
+              placeholder="请输入金额"
+              placeholder-style="color: #b8c4ce"
+              value="{{addForm.amount}}"
+              data-field="amount"
+              bindinput="onAddFormInput"
+            />
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn--secondary" hover-class="modal-btn--secondary-active" bindtap="onCloseAddModal">取消</button>
+        <button class="modal-btn modal-btn--primary" hover-class="modal-btn--primary-active" bindtap="onSaveAdd">添加</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+  </view>
+</view>

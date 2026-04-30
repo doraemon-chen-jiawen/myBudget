@@ -6,8 +6,10 @@
     "pages/budget/budget",
     "pages/records/records",
     "pages/statistics/statistics",
+    "pages/backfill/backfill",
     "pages/profile/profile",
-    "pages/family/family"
+    "pages/family/family",
+    "pages/income/income"
   ],
   "window": {
     "navigationBarTitleText": "myBudget",

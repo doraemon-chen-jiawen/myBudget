@@ -27,9 +27,6 @@ VALUES
   (NULL, 'monthly', 'snacks',          '零食',       '🍿', '小食、甜品、坚果',     '#4ADE80', 'rgba(74,222,128,0.1)',   'rgba(74,222,128,0.3)',   '["100","200","400"]',    200.00, 4, 1, 1, CURRENT_TIMESTAMP),
   (NULL, 'monthly', 'daily_necessities','日用品',    '🧴', '洗护、纸品、清洁',     '#56CCF2', 'rgba(86,204,242,0.1)',   'rgba(86,204,242,0.3)',   '["100","200","500"]',    200.00, 5, 1, 1, CURRENT_TIMESTAMP),
   (NULL, 'monthly', 'other_family',    '其他家庭花销','🏠','杂项、应急支出',      '#A78BFA', 'rgba(167,139,250,0.1)',  'rgba(167,139,250,0.3)',  '["300","500","1000"]',   200.00, 6, 1, 1, CURRENT_TIMESTAMP),
-  -- Finance (2)
-  (NULL, 'finance_interest', 'interest_daily',  '每日利息预算','💎','理财每日收益目标','#6FCF97','rgba(111,207,151,0.1)','rgba(111,207,151,0.3)','["30","50","100"]',    50.00,  1, 1, 1, CURRENT_TIMESTAMP),
-  (NULL, 'finance_interest', 'interest_monthly', '每月利息预算','📈','理财月度收益目标','#56CCF2','rgba(86,204,242,0.1)','rgba(86,204,242,0.3)','["500","1000","2000"]', 1000.00, 2, 1, 1, CURRENT_TIMESTAMP),
   -- Yearly (2)
   (NULL, 'yearly', 'travel',           '旅游',        '✈️', '年度旅游支出',        '#2E86DE', 'rgba(46,134,222,0.1)',   'rgba(46,134,222,0.3)',   '["2000","4000","6000"]', 5000.00, 1, 1, 1, CURRENT_TIMESTAMP),
   (NULL, 'yearly', 'parents',          '孝敬父母',     '👨‍👩‍👧', '给父母的孝心',        '#FF6B6B', 'rgba(255,107,107,0.1)', 'rgba(255,107,107,0.3)', '["500","1000","5000"]', 10000.00, 2, 1, 1, CURRENT_TIMESTAMP)
