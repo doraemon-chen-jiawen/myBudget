@@ -1,0 +1,13 @@
+{
+  "name": "spike-ocr",
+  "version": "1.0.0",
+  "description": "Spike验证：Tesseract OCR 拼豆图纸图例识别",
+  "private": true,
+  "scripts": {
+    "test": "node test-ocr.js"
+  },
+  "dependencies": {
+    "node-tesseract-ocr": "^2.0.0",
+    "sharp": "^0.33.0"
+  }
+}

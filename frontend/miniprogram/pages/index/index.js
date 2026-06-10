@@ -85,6 +85,9 @@ Page({
   },
 
   async onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().initTabs();
+    }
     await this.runAutoFillAndRefresh();
   },
 

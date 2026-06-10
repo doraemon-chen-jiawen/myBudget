@@ -1,0 +1,273 @@
+.stats-page {
+  min-height: 100vh;
+  background: #FAF7F2;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* ======== 头部渐变 ======== */
+.header-section {
+  background: linear-gradient(168deg, #F2994A 0%, #F2C94C 60%, #FFECD2 100%);
+  padding: 56rpx 40rpx 80rpx;
+  border-radius: 0 0 48rpx 48rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 装饰圆 — 模拟珠子散落效果 */
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: -80rpx;
+  right: -60rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.header-section::after {
+  content: '';
+  position: absolute;
+  bottom: -50rpx;
+  left: 30rpx;
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.header-content {
+  position: relative;
+  z-index: 2;
+}
+
+.header-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 16rpx rgba(242, 153, 74, 0.3);
+}
+
+.header-sub {
+  display: block;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 8rpx;
+  font-weight: 400;
+}
+
+/* ======== 统计卡片 — 珠子视觉 ======== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  padding: 0 32rpx;
+  margin-top: -48rpx;
+  position: relative;
+  z-index: 3;
+}
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 28rpx;
+  padding: 36rpx 28rpx 28rpx;
+  box-shadow: 0 4rpx 24rpx rgba(233, 147, 60, 0.08), 0 1rpx 4rpx rgba(45, 42, 38, 0.04);
+  transition: transform 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 卡片顶部装饰珠子 */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 16rpx;
+  left: 24rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #F2994A;
+  opacity: 0.5;
+}
+
+.stat-card:active {
+  transform: scale(0.96);
+}
+
+.stat-value {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: #2D2A26;
+  margin-bottom: 6rpx;
+  letter-spacing: -1rpx;
+  line-height: 1.1;
+}
+
+.stat-label {
+  display: block;
+  font-size: 22rpx;
+  color: #B8B0A4;
+  font-weight: 400;
+  letter-spacing: 1rpx;
+}
+
+/* 低库存卡片 */
+.stat-card-warn {
+  border-left: none;
+  background: linear-gradient(135deg, #ffffff 0%, #FFF8F0 100%);
+}
+
+.stat-card-warn::before {
+  background: #F2994A;
+  opacity: 1;
+  width: 16rpx;
+  height: 16rpx;
+}
+
+.stat-card-warn .stat-value {
+  color: #E8913A;
+}
+
+/* 缺货卡片 */
+.stat-card-danger {
+  border-left: none;
+  background: linear-gradient(135deg, #ffffff 0%, #FFF0F0 100%);
+}
+
+.stat-card-danger::before {
+  background: #FF6B6B;
+  opacity: 1;
+  width: 16rpx;
+  height: 16rpx;
+}
+
+.stat-card-danger .stat-value {
+  color: #FF6B6B;
+}
+
+/* ======== 库存预警卡片 ======== */
+.alert-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24rpx 32rpx 0;
+  padding: 28rpx 24rpx;
+  background: linear-gradient(135deg, #FFFAF0 0%, #FFF3E3 100%);
+  border-radius: 24rpx;
+  border: 2rpx solid rgba(242, 153, 74, 0.12);
+  box-shadow: 0 4rpx 20rpx rgba(242, 153, 74, 0.1);
+  transition: transform 0.2s;
+}
+
+.alert-card:active {
+  transform: scale(0.97);
+}
+
+.alert-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.alert-icon {
+  font-size: 40rpx;
+  margin-right: 16rpx;
+}
+
+.alert-text-wrap {
+  flex: 1;
+}
+
+.alert-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #E8913A;
+}
+
+.alert-desc {
+  display: block;
+  font-size: 22rpx;
+  color: #C68A4A;
+  margin-top: 4rpx;
+}
+
+.alert-arrow {
+  font-size: 44rpx;
+  color: #DEB487;
+  font-weight: 300;
+}
+
+/* ======== 快捷入口 ======== */
+.quick-section {
+  padding: 24rpx 32rpx 0;
+}
+
+.quick-card {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 28rpx;
+  background: #ffffff;
+  border-radius: 28rpx;
+  box-shadow: 0 4rpx 24rpx rgba(233, 147, 60, 0.06), 0 1rpx 4rpx rgba(45, 42, 38, 0.03);
+  transition: transform 0.2s ease;
+  margin-bottom: 20rpx;
+}
+
+.quick-card-active {
+  transform: scale(0.97) !important;
+  background: rgba(242, 153, 74, 0.02);
+}
+
+.quick-icon {
+  font-size: 44rpx;
+  margin-right: 24rpx;
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFF5EB 0%, #FFECD2 100%);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.quick-text-wrap {
+  flex: 1;
+}
+
+.quick-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2A26;
+}
+
+.quick-desc {
+  display: block;
+  font-size: 22rpx;
+  color: #B8B0A4;
+  margin-top: 4rpx;
+}
+
+.quick-arrow {
+  font-size: 44rpx;
+  color: #E0D8CC;
+  font-weight: 300;
+}
+
+/* ======== 免责声明 ======== */
+.disclaimer {
+  text-align: center;
+  padding: 60rpx 32rpx 40rpx;
+}
+
+.disclaimer-text {
+  font-size: 22rpx;
+  color: #CCC4B8;
+  letter-spacing: 1rpx;
+}

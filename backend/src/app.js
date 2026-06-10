@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
+const path = require("path");
 
 const healthRoute = require("./routes/health");
 const authRoute = require("./routes/auth");
@@ -22,16 +23,20 @@ const statisticsRoute = require("./routes/statistics");
 const invitationRoute = require("./routes/invitation");
 const familyManagementRoute = require("./routes/family-management");
 const backfillRoute = require("./routes/backfill");
+const beadRoute = require("./routes/bead");
 const { notFoundHandler, errorHandler } = require("./middleware/error-handler");
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors());
 app.use(morgan("dev"));
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(
   rateLimit({
@@ -66,6 +71,7 @@ app.use("/api/statistics", statisticsRoute);
 app.use("/api/backfill", backfillRoute);
 app.use("/api/invitations", invitationRoute);
 app.use("/api/family-management", familyManagementRoute);
+app.use("/api/bead", beadRoute);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

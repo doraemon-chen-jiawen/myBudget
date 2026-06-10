@@ -1,0 +1,97 @@
+<view class="convert-page">
+  <!-- 步骤指示器 -->
+  <view class="steps">
+    <view class="step {{step >= 1 ? 'step-active' : ''}}"><text class="step-num">1</text><text class="step-label">上传</text></view>
+    <view class="step-line {{step >= 2 ? 'step-line-active' : ''}}"></view>
+    <view class="step {{step >= 2 ? 'step-active' : ''}}"><text class="step-num">2</text><text class="step-label">设置</text></view>
+    <view class="step-line {{step >= 3 ? 'step-line-active' : ''}}"></view>
+    <view class="step {{step >= 3 ? 'step-active' : ''}}"><text class="step-num">3</text><text class="step-label">结果</text></view>
+  </view>
+
+  <!-- Step 1: 上传图片 -->
+  <view wx:if="{{step === 1}}" class="step-content">
+    <view class="upload-area" bindtap="onChooseImage">
+      <image wx:if="{{imagePath}}" class="upload-preview" src="{{imagePath}}" mode="aspectFit" />
+      <view wx:else class="upload-placeholder">
+        <text class="upload-icon">📷</text>
+        <text class="upload-text">点击上传图片</text>
+        <text class="upload-hint">支持拍照或相册选择，JPG/PNG ≤5MB</text>
+      </view>
+    </view>
+    <button class="next-btn" bindtap="onConfirmUpload" disabled="{{!imagePath}}">下一步</button>
+    <text class="remain-tip">今日剩余转换次数：{{remainCount}}</text>
+  </view>
+
+  <!-- Step 2: 预处理 + 尺寸 -->
+  <view wx:if="{{step === 2}}" class="step-content">
+    <view class="preview-card">
+      <text class="section-label">画布尺寸（宽×高，单位：颗）</text>
+      <view class="size-options">
+        <view
+          wx:for="{{sizeOptions}}"
+          wx:key="label"
+          class="size-btn {{selectedSizeIndex === index ? 'size-btn-active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onSizeTap"
+        >
+          <text>{{item.label}}</text>
+        </view>
+      </view>
+
+      <view class="selected-info">
+        <text>已选择：{{selectedWidth}}×{{selectedHeight}} 颗</text>
+      </view>
+
+      <view class="slider-group">
+        <view class="slider-row">
+          <text class="slider-label">亮度 {{brightness}}%</text>
+          <slider min="50" max="150" value="{{brightness}}" bindchange="onBrightnessChange" activeColor="#F2994A" />
+        </view>
+        <view class="slider-row">
+          <text class="slider-label">对比度 {{contrast}}%</text>
+          <slider min="50" max="150" value="{{contrast}}" bindchange="onContrastChange" activeColor="#F2994A" />
+        </view>
+      </view>
+    </view>
+
+    <button class="convert-btn" bindtap="onStartConvert">开始转换</button>
+  </view>
+
+  <!-- 隐藏 Canvas -->
+  <canvas type="2d" id="convertCanvas" class="hidden-canvas"></canvas>
+
+  <!-- Step 3: 结果展示 -->
+  <view wx:if="{{step === 3}}" class="step-content">
+    <!-- 像素图纸 -->
+    <view class="result-card">
+      <text class="section-label">像素图纸（{{selectedWidth}}×{{selectedHeight}} 颗）</text>
+      <image class="result-img" src="{{pixelImage}}" mode="aspectFit" />
+    </view>
+
+    <!-- 用料清单 -->
+    <view class="result-card">
+      <view class="card-header">
+        <text class="section-label">用料清单</text>
+        <text class="material-count">{{materials.length}} 种颜色 / {{totalBeads}} 颗</text>
+      </view>
+      <view class="material-list">
+        <view wx:for="{{materials}}" wx:key="color_code" class="material-item">
+          <view class="material-color" style="background: rgb({{item.r || 0}},{{item.g || 0}},{{item.b || 0}})"></view>
+          <text class="material-code">{{item.color_code}}</text>
+          <text class="material-name">{{item.color_name}}</text>
+          <text class="material-qty">{{item.quantity}} 颗</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-group">
+      <button class="action-btn" bindtap="onDownload">📥 下载图纸</button>
+      <button class="action-btn" bindtap="onCopyMaterials">📋 复制清单</button>
+      <button class="action-btn action-btn-primary" bindtap="onSaveToLibrary" disabled="{{saving}}">
+        {{saving ? '保存中...' : '💾 保存到我的图纸'}}
+      </button>
+      <button class="action-btn" bindtap="onReset">🔄 重新转换</button>
+    </view>
+  </view>
+</view>

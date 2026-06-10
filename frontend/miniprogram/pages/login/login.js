@@ -10,7 +10,14 @@ Page({
 
   onShow() {
     if (this.isLoggedIn()) {
-      wx.switchTab({ url: "/pages/index/index" });
+      const currentModule = wx.getStorageSync('currentModule');
+      if (currentModule === 'bead') {
+        wx.reLaunch({ url: '/pages/bead/index/index' });
+      } else if (currentModule === 'budget') {
+        wx.reLaunch({ url: '/pages/index/index' });
+      } else {
+        wx.reLaunch({ url: '/pages/portal/portal' });
+      }
     }
   },
 
@@ -62,9 +69,14 @@ Page({
       });
 
       setTimeout(() => {
-        wx.switchTab({
-          url: "/pages/index/index"
-        });
+        const currentModule = wx.getStorageSync('currentModule');
+        if (currentModule === 'bead') {
+          wx.reLaunch({ url: '/pages/bead/index/index' });
+        } else if (currentModule === 'budget') {
+          wx.reLaunch({ url: '/pages/index/index' });
+        } else {
+          wx.reLaunch({ url: '/pages/portal/portal' });
+        }
       }, 1000);
     } catch (error) {
       // 错误提示已在 request 内统一处理

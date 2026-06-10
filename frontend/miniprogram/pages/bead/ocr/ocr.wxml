@@ -1,0 +1,239 @@
+<view class="ocr-page">
+  <!-- 步骤指示器 -->
+  <view class="steps">
+    <view class="step {{step >= 1 ? 'step-active' : ''}}"><text class="step-num">1</text><text class="step-label">上传</text></view>
+    <view class="step-line {{step >= 2 ? 'step-line-active' : ''}}"></view>
+    <view class="step {{step >= 2 ? 'step-active' : ''}}"><text class="step-num">2</text><text class="step-label">识别</text></view>
+    <view class="step-line {{step >= 3 ? 'step-line-active' : ''}}"></view>
+    <view class="step {{step >= 3 ? 'step-active' : ''}}"><text class="step-num">3</text><text class="step-label">校验</text></view>
+    <view class="step-line {{step >= 4 ? 'step-line-active' : ''}}"></view>
+    <view class="step {{step >= 4 ? 'step-active' : ''}}"><text class="step-num">4</text><text class="step-label">结果</text></view>
+  </view>
+
+  <!-- 上传图纸（仅 step 1 显示） -->
+    <view wx:if="{{step === 1 && !imagePath}}" class="upload-area" bindtap="onChooseImage">
+      <view class="upload-placeholder">
+        <text class="upload-icon">📐</text>
+        <text class="upload-text">点击上传成品图纸</text>
+        <text class="upload-hint">上传包含图例区域的拼豆成品图纸</text>
+      </view>
+    </view>
+
+    <!-- 已选择图片时，显示重新选择按钮 -->
+    <view wx:if="{{step === 1 && imagePath}}" class="upload-area upload-area-compact" bindtap="onChooseImage">
+      <text class="reselect-text">📷 重新选择图片</text>
+    </view>
+
+    <!-- 框选裁剪区域 -->
+    <view wx:if="{{step === 1 && imagePath}}" class="crop-container">
+      <view
+        class="crop-viewport"
+        catchtouchstart="onViewportTouchStart"
+        catchtouchmove="onViewportTouchMove"
+        catchtouchend="onViewportTouchEnd"
+      >
+        <view class="crop-inner" style="transform: scale({{scale}}) translate({{panX}}px, {{panY}}px); transform-origin: 0 0;">
+          <image
+            class="crop-image"
+            src="{{imagePath}}"
+            mode="widthFix"
+            bindload="onImageLoad"
+          />
+
+          <!-- 裁剪框 -->
+          <view
+            class="crop-rect"
+            style="left: {{cropRect.x}}%; top: {{cropRect.y}}%; width: {{cropRect.width}}%; height: {{cropRect.height}}%;"
+          >
+            <!-- 四个角的控制点 -->
+            <view class="crop-handle crop-handle-nw" data-handle="nw"
+              catchtouchstart="onHandleStart" catchtouchmove="onHandleMove" catchtouchend="onHandleEnd"></view>
+            <view class="crop-handle crop-handle-ne" data-handle="ne"
+              catchtouchstart="onHandleStart" catchtouchmove="onHandleMove" catchtouchend="onHandleEnd"></view>
+            <view class="crop-handle crop-handle-sw" data-handle="sw"
+              catchtouchstart="onHandleStart" catchtouchmove="onHandleMove" catchtouchend="onHandleEnd"></view>
+            <view class="crop-handle crop-handle-se" data-handle="se"
+              catchtouchstart="onHandleStart" catchtouchmove="onHandleMove" catchtouchend="onHandleEnd"></view>
+
+            <!-- 内部拖动区域 -->
+            <view class="crop-drag-area"
+              catchtouchstart="onDragStart" catchtouchmove="onDragMove" catchtouchend="onDragEnd"
+            ></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 预设选项 -->
+      <view class="preset-buttons">
+        <button class="preset-btn" bindtap="onPreset15">底部 15%</button>
+        <button class="preset-btn" bindtap="onPreset20">底部 20%</button>
+        <button class="preset-btn" bindtap="onPreset25">底部 25%</button>
+        <button class="preset-btn" bindtap="onPreset100">完整图片</button>
+      </view>
+
+      <!-- 缩放控制 — 滑块 + 自由输入 -->
+      <view class="bead-scale">
+        <view class="bead-scale-row">
+          <text class="bead-scale-label-fixed">缩放</text>
+          <slider
+            class="bead-scale-slider"
+            min="1" max="3" step="0.1"
+            value="{{scale}}"
+            activeColor="#F2994A"
+            backgroundColor="#F0EBE3"
+            block-size="20"
+            block-color="#F2994A"
+            bindchange="onScaleSlider"
+          />
+          <view class="bead-scale-input-wrap">
+            <input
+              class="bead-scale-input"
+              type="digit"
+              value="{{scaleDisplay}}"
+              bindblur="onScaleInput"
+              bindconfirm="onScaleInput"
+            />
+            <text class="bead-scale-suffix">x</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="crop-hint">
+        <text class="hint-text">拖动边框调整裁剪区域 • 点击＋−缩放 • 拖动图片平移</text>
+      </view>
+    </view>
+
+    <button wx:if="{{step === 1}}" class="convert-btn" bindtap="onCropAndRecognize" disabled="{{!imagePath || loading}}">
+      {{loading ? '识别中...' : '开始识别'}}
+    </button>
+
+  <!-- Step 3: 人工校验 -->
+  <view wx:if="{{step === 3}}" class="step-content">
+    <!-- 裁剪区域预览 -->
+    <view class="crop-preview-card" wx:if="{{cropImage}}">
+      <view class="preview-header">
+        <text class="section-label">裁剪区域</text>
+        <view class="preview-scale-row">
+          <text class="preview-scale-label">缩放</text>
+          <slider
+            class="preview-scale-slider"
+            min="1" max="5" step="0.5"
+            value="{{previewScale}}"
+            activeColor="#F2994A"
+            backgroundColor="#F0EBE3"
+            block-size="16"
+            block-color="#F2994A"
+            bindchange="onPreviewScaleSlider"
+          />
+          <text class="preview-scale-val">{{previewScaleDisplay}}x</text>
+        </view>
+      </view>
+      <scroll-view scroll-y scroll-x="{{previewScale > 1}}" class="preview-viewport">
+        <view style="transform: scale({{previewScale}}); transform-origin: 0 0;">
+          <image class="preview-img" src="{{cropImage}}" mode="widthFix" />
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 空结果状态 -->
+    <view wx:if="{{items.length === 0}}" class="verify-card">
+      <view class="empty-result">
+        <text class="empty-icon">📭</text>
+        <text class="empty-title">未能识别出图例数据</text>
+        <text class="empty-hint">请调整裁剪区域后重新识别，或手动添加图例</text>
+      </view>
+
+      <view class="action-group">
+        <button class="action-btn" bindtap="onBackToAdjust">🔙 调整裁剪区域</button>
+        <button class="action-btn action-btn-primary" bindtap="onAddLegend">➕ 手动添加图例</button>
+      </view>
+    </view>
+
+    <!-- 有识别结果 -->
+    <view wx:else class="verify-card">
+      <text class="section-label">识别结果校验</text>
+      <text class="verify-hint">请检查并修正识别结果，删除无效条目</text>
+
+      <view class="verify-list">
+        <view wx:for="{{items}}" wx:key="index" class="verify-item {{item.invalid ? 'verify-item-invalid' : ''}}">
+          <view class="verify-fields">
+            <input class="verify-input verify-code {{item.invalid ? 'code-invalid' : ''}}" value="{{item.code}}" placeholder="色号"
+              data-index="{{index}}" data-field="code" bindinput="onItemInput" />
+            <input class="verify-input verify-count" type="number" value="{{item.count}}" placeholder="数量"
+              data-index="{{index}}" data-field="count" bindinput="onItemInput" />
+          </view>
+          <view class="verify-del" data-index="{{index}}" bindtap="onDeleteItem">
+            <text class="del-icon">✕</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="add-row" bindtap="onAddItem">
+        <text class="add-text">+ 添加一条</text>
+      </view>
+    </view>
+
+    <!-- 尺寸选择 -->
+    <view class="size-select-card">
+      <text class="section-label">选择图纸尺寸</text>
+      <view class="size-options">
+        <view
+          wx:for="{{sizes}}"
+          wx:key="label"
+          class="size-option {{selectedSizeIndex === index ? 'size-option-active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onSizeSelect"
+        >
+          <text class="size-option-text">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button class="convert-btn" bindtap="onConfirmItems">确认无误</button>
+  </view>
+
+  <!-- Step 4: 结果 -->
+  <view wx:if="{{step === 4}}" class="step-content">
+    <view class="result-card">
+      <view class="card-header">
+        <text class="section-label">用料清单</text>
+        <text class="material-count">{{items.length}} 种颜色 / {{totalBeads}} 颗</text>
+      </view>
+      <view class="material-list">
+        <view wx:for="{{items}}" wx:key="code" class="material-item">
+          <view class="material-code">{{item.code}}</view>
+          <text class="material-qty">{{item.count}} 颗</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="drawing-name-card">
+      <text class="section-label">图纸名称</text>
+      <input
+        class="drawing-name-input"
+        value="{{drawingName}}"
+        placeholder="请输入图纸名称"
+        bindinput="onDrawingNameInput"
+      />
+    </view>
+
+    <view class="action-group">
+      <button class="action-btn" bindtap="onCopyMaterials">📋 复制清单</button>
+      <button class="action-btn action-btn-primary" bindtap="onSaveToLibrary" disabled="{{saving}}">
+        {{saving ? '保存中...' : '💾 保存到我的图纸'}}
+      </button>
+      <button class="action-btn" bindtap="onReset">🔄 重新识别</button>
+    </view>
+  </view>
+
+  <!-- 隐藏 Canvas -->
+  <canvas type="2d" id="cropCanvas" class="hidden-canvas"></canvas>
+
+  <!-- 加载遮罩 -->
+  <view wx:if="{{loading}}" class="loading-mask">
+    <view class="loading-box">
+      <text class="loading-icon">🔍</text>
+      <text class="loading-text">正在识别图例文字...</text>
+    </view>
+  </view>
+</view>

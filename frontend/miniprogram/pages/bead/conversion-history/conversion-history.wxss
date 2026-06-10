@@ -1,0 +1,132 @@
+/* 转换记录页面样式 */
+.conversion-history-page {
+  min-height: 100vh;
+  background: #FAF7F2;
+  padding-bottom: 20rpx;
+}
+
+/* 记录列表 */
+.records-list {
+  padding: 24rpx 32rpx;
+}
+
+.record-item {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(242, 153, 74, 0.06);
+  transition: transform 0.15s;
+}
+
+.record-item:active {
+  transform: scale(0.98);
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #F5F0E8;
+}
+
+.record-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2A26;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #B8B0A4;
+}
+
+.record-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.record-info {
+  display: flex;
+  font-size: 26rpx;
+}
+
+.info-label {
+  color: #B8B0A4;
+  margin-right: 10rpx;
+}
+
+.info-value {
+  color: #2D2A26;
+}
+
+.record-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.action-btn {
+  padding: 12rpx 28rpx;
+  background: rgba(242, 153, 74, 0.1);
+  color: #F2994A;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  text-align: center;
+}
+
+.action-btn:active {
+  background: rgba(242, 153, 74, 0.18);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #B8B0A4;
+  margin-bottom: 40rpx;
+}
+
+.go-convert-btn {
+  width: 220rpx;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #F2994A;
+  color: #fff;
+  border-radius: 100rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 16rpx rgba(242, 153, 74, 0.3);
+}
+
+.go-convert-btn::after {
+  border: none;
+}
+
+/* 加载状态 */
+.loading-more, .no-more {
+  text-align: center;
+  padding: 32rpx;
+  font-size: 24rpx;
+  color: #CCC4B8;
+}

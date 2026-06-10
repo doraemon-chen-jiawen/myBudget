@@ -1,0 +1,58 @@
+<view class="stats-page">
+  <!-- 头部标题 -->
+  <view class="header-section">
+    <view class="header-content">
+      <text class="header-title">拼豆助手</text>
+      <text class="header-sub">库存概览</text>
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-grid">
+    <view class="stat-card">
+      <text class="stat-value">{{stats.totalQuantity}}</text>
+      <text class="stat-label">库存总量</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.colorCount}}</text>
+      <text class="stat-label">颜色种类</text>
+    </view>
+    <view class="stat-card {{stats.lowStock > 0 ? 'stat-card-warn' : ''}}">
+      <text class="stat-value">{{stats.lowStock}}</text>
+      <text class="stat-label">低库存</text>
+    </view>
+    <view class="stat-card {{stats.outOfStock > 0 ? 'stat-card-danger' : ''}}">
+      <text class="stat-value">{{stats.outOfStock}}</text>
+      <text class="stat-label">缺货</text>
+    </view>
+  </view>
+
+  <!-- 库存预警提示 -->
+  <view wx:if="{{hasAlert}}" class="alert-card" bindtap="goToWarehouse">
+    <view class="alert-left">
+      <text class="alert-icon">⚠️</text>
+      <view class="alert-text-wrap">
+        <text class="alert-title">库存预警</text>
+        <text class="alert-desc">有 {{stats.lowStock}} 种低库存、{{stats.outOfStock}} 种缺货豆子</text>
+      </view>
+    </view>
+    <text class="alert-arrow">›</text>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-section">
+    <view class="quick-card" bindtap="goToOcr" hover-class="quick-card-active">
+      <text class="quick-icon">🔍</text>
+      <view class="quick-text-wrap">
+        <text class="quick-title">图纸识别</text>
+        <text class="quick-desc">上传图纸，OCR识别图例</text>
+      </view>
+      <text class="quick-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 免责声明 -->
+  <view class="disclaimer">
+    <text class="disclaimer-text">本工具仅供个人手工创作参考，禁止商用</text>
+  </view>
+</view>

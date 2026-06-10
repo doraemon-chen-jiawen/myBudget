@@ -35,7 +35,22 @@
       "Bash(/usr/local/mysql/bin/mysql -u root -p12345678 lazy_budget -e \"SELECT id, user_id, period_type, period_key, budget_date, budget_month, planned_amount FROM budgets WHERE id=6;\")",
       "Bash(curl -s -X PUT \"http://127.0.0.1:3000/api/budgets/6\" -H \"Content-Type: application/json\" -d '{\"userId\":2,\"periodType\":\"monthly\",\"periodKey\":\"monthly_daily_necessities\",\"plannedAmount\":100,\"budgetMonth\":\"2026-04\"}')",
       "Bash(xargs kill *)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(npx skills *)",
+      "Bash(openspec init *)",
+      "Bash(tesseract --version)",
+      "Bash(where tesseract *)",
+      "Bash(winget install *)",
+      "Bash(ls \"E:/setups/\" 2>&1)",
+      "Read(//e/setups/**)",
+      "Bash(\"E:/setups/tesseract.exe\" --version)",
+      "Bash(node test-ocr.js)",
+      "Bash(openspec new *)",
+      "Bash(openspec status *)",
+      "Bash(openspec instructions *)",
+      "WebSearch",
+      "Bash(openspec list *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

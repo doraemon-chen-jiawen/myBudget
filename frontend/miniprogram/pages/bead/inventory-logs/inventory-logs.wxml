@@ -1,0 +1,74 @@
+<!--库存日志页面-->
+<view class="inventory-logs-page">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view
+      class="filter-item {{filterType === 'all' ? 'active' : ''}}"
+      data-type="all"
+      bindtap="switchFilter"
+    >
+      全部
+    </view>
+    <view
+      class="filter-item {{filterType === 'in' ? 'active' : ''}}"
+      data-type="in"
+      bindtap="switchFilter"
+    >
+      入库
+    </view>
+    <view
+      class="filter-item {{filterType === 'out' ? 'active' : ''}}"
+      data-type="out"
+      bindtap="switchFilter"
+    >
+      出库
+    </view>
+  </view>
+
+  <!-- 统计信息 -->
+  <view class="stats-info" wx:if="{{total > 0}}">
+    共 {{total}} 条记录
+  </view>
+
+  <!-- 日志列表 -->
+  <view class="logs-list" wx:if="{{logs.length > 0}}">
+    <view class="log-item" wx:for="{{logs}}" wx:key="id">
+      <view class="log-header">
+        <view class="log-type {{item.type === 'in' ? 'in' : 'out'}}">
+          {{item.type === 'in' ? '+ 入库' : '- 出库'}}
+        </view>
+        <view class="log-time">{{item.created_at}}</view>
+      </view>
+
+      <view class="log-content">
+        <view class="log-color">
+          <text class="color-code">{{item.color_code}}</text>
+          <text class="color-name" wx:if="{{item.note}}">{{item.note}}</text>
+        </view>
+        <view class="log-quantity {{item.type === 'in' ? 'plus' : 'minus'}}">
+          {{item.type === 'in' ? '+' : '-'}}{{item.quantity}}
+        </view>
+      </view>
+
+      <view class="log-source">
+        来源：{{item.source === 'manual' ? '手动操作' : '订单入库'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{logs.length === 0 && !loading}}">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无日志记录</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{!hasMore && logs.length > 0}}">
+    <text>没有更多了</text>
+  </view>
+</view>

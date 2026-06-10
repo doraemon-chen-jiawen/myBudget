@@ -2,6 +2,7 @@
   "pages": [
     "pages/login/login",
     "pages/register/register",
+    "pages/portal/portal",
     "pages/index/index",
     "pages/budget/budget",
     "pages/records/records",
@@ -9,7 +10,19 @@
     "pages/backfill/backfill",
     "pages/profile/profile",
     "pages/family/family",
-    "pages/income/income"
+    "pages/income/income",
+    "pages/bead/index/index",
+    "pages/bead/warehouse/warehouse",
+    "pages/bead/drawing/drawing",
+    "pages/bead/profile/profile",
+    "pages/bead/drawing-detail/drawing-detail",
+    "pages/bead/convert/convert",
+    "pages/bead/ocr/ocr",
+    "pages/bead/order-ocr/order-ocr",
+    "pages/bead/alert-settings/alert-settings",
+    "pages/bead/inventory-logs/inventory-logs",
+    "pages/bead/favorites/favorites",
+    "pages/bead/conversion-history/conversion-history"
   ],
   "window": {
     "navigationBarTitleText": "myBudget",
@@ -19,22 +32,43 @@
     "backgroundColor": "#F7F9FB"
   },
   "tabBar": {
+    "custom": true,
     "color": "#888888",
     "selectedColor": "#6FCF97",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
       {
+        "pagePath": "pages/portal/portal",
+        "text": "门户"
+      },
+      {
         "pagePath": "pages/index/index",
-        "text": "首页",
+        "text": "记账首页",
         "iconPath": "icons/home.png",
         "selectedIconPath": "icons/home-active.png"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "我的",
+        "text": "记账我的",
         "iconPath": "icons/profile.png",
         "selectedIconPath": "icons/profile-active.png"
+      },
+      {
+        "pagePath": "pages/bead/index/index",
+        "text": "拼豆首页"
+      },
+      {
+        "pagePath": "pages/bead/warehouse/warehouse",
+        "text": "豆仓"
+      },
+      {
+        "pagePath": "pages/bead/drawing/drawing",
+        "text": "图纸"
+      },
+      {
+        "pagePath": "pages/bead/profile/profile",
+        "text": "拼豆我的"
       }
     ]
   },

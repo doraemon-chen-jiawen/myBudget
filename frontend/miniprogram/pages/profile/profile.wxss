@@ -4,7 +4,8 @@
   min-height: 100vh;
   background: #f3f5f4;
   position: relative;
-  overflow: hidden;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 /* ===== Header ===== */
@@ -290,6 +291,10 @@
 
 .icon-help {
   background: rgba(74, 222, 128, 0.12);
+}
+
+.icon-switch {
+  background: rgba(242, 153, 74, 0.12);
 }
 
 .icon-emoji {

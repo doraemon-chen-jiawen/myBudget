@@ -1,0 +1,70 @@
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background: #ffffff;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4rpx 24rpx rgba(233, 147, 60, 0.06);
+  z-index: 999;
+}
+
+.tab-bar-border {
+  display: none;
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx 0;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.tab-bar-item:active {
+  transform: scale(0.88);
+}
+
+/* 活跃态顶部指示条 */
+.tab-bar-item.active::before {
+  content: '';
+  position: absolute;
+  top: 4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32rpx;
+  height: 6rpx;
+  border-radius: 3rpx;
+  background: linear-gradient(90deg, #F2994A, #F2C94C);
+}
+
+.tab-icon {
+  font-size: 40rpx;
+  margin-bottom: 4rpx;
+  opacity: 0.35;
+  transition: all 0.25s ease;
+  filter: grayscale(0.8);
+}
+
+.tab-icon.active {
+  opacity: 1;
+  filter: grayscale(0);
+  transform: scale(1.15);
+}
+
+.tab-text {
+  font-size: 22rpx;
+  color: #B8B0A4;
+  transition: all 0.25s ease;
+  font-weight: 400;
+}
+
+.tab-text.active {
+  color: #E8913A;
+  font-weight: 600;
+}

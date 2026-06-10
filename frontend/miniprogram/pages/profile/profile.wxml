@@ -107,6 +107,19 @@
         <text class="arrow-icon">›</text>
       </view>
 
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onSwitchModule">
+        <view class="menu-left">
+          <view class="icon-box icon-switch">
+            <text class="icon-emoji">🔄</text>
+          </view>
+          <view class="menu-text-wrap">
+            <text class="menu-title">切换模块</text>
+            <text class="menu-subtitle">切换到拼豆助手</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+
       <view class="menu-item" hover-class="menu-item-active" bindtap="onNavigateToSettings">
         <view class="menu-left">
           <view class="icon-box icon-settings">

@@ -1,0 +1,91 @@
+<view class="drawing-page">
+  <!-- 筛选区域 -->
+  <view class="filter-section">
+    <!-- 尺寸筛选 -->
+    <view class="filter-row">
+      <text class="filter-label">尺寸</text>
+      <scroll-view scroll-x class="filter-scroll">
+        <view
+          wx:for="{{sizes}}"
+          wx:key="key"
+          class="filter-btn {{selectedSize === item.key ? 'filter-btn-active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onSizeTap"
+        >
+          <text>{{item.label}}</text>
+        </view>
+      </scroll-view>
+    </view>
+    <!-- 拼接状态筛选 -->
+    <view class="filter-row">
+      <text class="filter-label">状态</text>
+      <scroll-view scroll-x class="filter-scroll">
+        <view
+          wx:for="{{assembledOptions}}"
+          wx:key="key"
+          class="filter-btn {{selectedAssembled === item.key ? 'filter-btn-active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onAssembledTap"
+        >
+          <text>{{item.label}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 图纸列表 -->
+  <view class="drawing-list">
+    <view
+      wx:for="{{drawingList}}"
+      wx:key="id"
+      class="drawing-card"
+    >
+      <!-- 左侧缩略图 -->
+      <view class="drawing-thumb" data-id="{{item.id}}" bindtap="onDrawingTap">
+        <image wx:if="{{item.pixel_image}}" class="thumb-img" src="{{item.pixel_image}}" mode="aspectFill" />
+        <view wx:else class="thumb-placeholder">
+          <text class="thumb-size">{{item.width}}×{{item.height}}</text>
+        </view>
+      </view>
+
+      <!-- 右侧信息 -->
+      <view class="drawing-info" data-id="{{item.id}}" bindtap="onDrawingTap">
+        <text class="drawing-name">{{item.name || '未命名图纸'}}</text>
+        <view class="drawing-tags">
+          <view class="tag tag-size">{{item.width}}×{{item.height}}</view>
+          <view class="tag {{item.is_assembled ? 'tag-assembled' : 'tag-pending'}}">
+            {{item.is_assembled ? '已完成' : '未拼接'}}
+          </view>
+        </view>
+        <text class="drawing-meta">{{item.material_count || 0}} 种颜色 · {{item.total_beads || 0}} 颗</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="drawing-actions">
+        <view class="action-btn action-btn-del" data-id="{{item.id}}" catchtap="onDeleteDrawing">
+          <text class="del-icon">🗑️</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{!loading && drawingList.length === 0}}" class="empty-state">
+      <text class="empty-icon">📐</text>
+      <text class="empty-text">暂无图纸</text>
+      <text class="empty-hint">去「图纸识别」上传图纸开始吧</text>
+    </view>
+
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="loading-tip">
+      <text class="loading-text">加载中...</text>
+    </view>
+    <view wx:elif="{{!hasMore && drawingList.length > 0}}" class="loading-tip">
+      <text class="loading-text">没有更多了</text>
+    </view>
+  </view>
+
+  <!-- 新建图纸浮动按钮 -->
+  <view class="fab-btn" bindtap="onCreateDrawing">
+    <text class="fab-icon">+</text>
+  </view>
+</view>

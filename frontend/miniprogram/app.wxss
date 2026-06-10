@@ -12,12 +12,20 @@ page {
   --color-danger: #FF6B6B;
   --color-danger-light: #FFE5E5;
 
-  /* 中性色 */
-  --color-bg: #F8FAFC;
-  --color-card: #FFFFFF;
-  --color-text-main: #1E293B;
-  --color-text-secondary: #64748B;
-  --color-text-hint: #94A3B8;
+  /* 拼豆模块专属色彩 */
+  --bead-primary: #F2994A;
+  --bead-primary-light: rgba(242, 153, 74, 0.12);
+  --bead-primary-dark: #D4832F;
+  --bead-gold: #F2C94C;
+  --bead-coral: #FF6B6B;
+  --bead-success: #6FCF97;
+  --bead-bg: #FAF7F2;
+  --bead-card: #FFFFFF;
+  --bead-text: #2D2A26;
+  --bead-text-secondary: #8C857C;
+  --bead-text-hint: #B8B0A4;
+  --bead-border: #F0EBE3;
+  --bead-divider: #F5F0E8;
 
   /* 有机形状 */
   --radius-smooth: 24rpx;
@@ -30,6 +38,11 @@ page {
   --shadow-elevated: 0 16rpx 48rpx rgba(30, 41, 59, 0.08);
   --shadow-inset: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
   --shadow-modal: 0 24rpx 80rpx rgba(0, 0, 0, 0.2);
+
+  /* 拼豆模块阴影 */
+  --bead-shadow-sm: 0 2rpx 12rpx rgba(242, 153, 74, 0.06);
+  --bead-shadow-md: 0 4rpx 24rpx rgba(45, 42, 38, 0.06);
+  --bead-shadow-lg: 0 8rpx 40rpx rgba(45, 42, 38, 0.08);
 
   background: #F8FAFC;
   color: var(--color-text-main);

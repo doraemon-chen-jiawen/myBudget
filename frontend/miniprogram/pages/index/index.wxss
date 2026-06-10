@@ -9,7 +9,7 @@
 .page {
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
 }
 
 /* ===== Decorative Background Orbs ===== */

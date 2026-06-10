@@ -1,0 +1,163 @@
+<view class="warehouse-page">
+  <!-- 统计概览 -->
+  <view class="stats-card">
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-value">{{stats.totalBeads}}</text>
+        <text class="stat-label">总颗数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.colorCount}}</text>
+        <text class="stat-label">颜色种类</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value warn">{{stats.lowStock}}</text>
+        <text class="stat-label">低库存</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value danger">{{shortageCount}}</text>
+        <text class="stat-label">缺货</text>
+      </view>
+    </view>
+    <view class="stat-footer">
+      <text class="stat-drawing">已统计图纸：{{stats.statDrawings}} 份</text>
+      <text class="stat-link" bindtap="onOpenStatConfig">设置范围 ›</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-bar">
+    <button class="action-btn action-in" bindtap="onOpenStockIn">📥 手动入库</button>
+    <button class="action-btn action-ocr" bindtap="onOpenOcrStockIn">📦 订单入库</button>
+    <button class="action-btn action-out" bindtap="onOpenStockOut">📤 出库</button>
+  </view>
+
+  <!-- 缺货列表 -->
+  <view class="shortage-section" wx:if="{{shortageList.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">缺货明细</text>
+      <text class="section-subtitle">需要 {{shortageTotal}} 颗补货</text>
+    </view>
+    <view class="shortage-list">
+      <view wx:for="{{shortageList}}" wx:key="color_code" class="shortage-item">
+        <view class="color-dot" style="background: rgb({{item.r}},{{item.g}},{{item.b}})"></view>
+        <view class="shortage-info">
+          <text class="shortage-code">{{item.color_code}}</text>
+          <text class="shortage-name">{{item.color_name || ''}}</text>
+        </view>
+        <view class="shortage-nums">
+          <text class="shortage-demand">需{{item.demand}}</text>
+          <text class="shortage-stock">有{{item.stock}}</text>
+          <text class="shortage-gap">缺{{item.shortage}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 库存列表 -->
+  <view class="inventory-section">
+    <text class="section-title">库存列表</text>
+
+    <view wx:if="{{inventory.length === 0}}" class="empty-state">
+      <text class="empty-text">暂无库存数据</text>
+    </view>
+
+    <view wx:else class="inventory-list">
+      <view wx:for="{{inventory}}" wx:key="id" class="inventory-item">
+        <view class="color-dot" style="background: rgb({{item.r || 200}},{{item.g || 200}},{{item.b || 200}})"></view>
+        <view class="item-info">
+          <text class="item-code">{{item.color_code}}</text>
+          <text class="item-name">{{item.color_name || ''}}</text>
+        </view>
+        <view class="item-nums" wx:if="{{item.demand > 0}}">
+          <text class="item-demand">需{{item.demand}}</text>
+          <text class="item-stock-num">有{{item.quantity}}</text>
+          <text class="item-gap {{item.demand > item.quantity ? 'warn' : 'ok'}}">{{item.demand > item.quantity ? '缺' + (item.demand - item.quantity) : '✓'}}</text>
+        </view>
+        <text class="item-qty" wx:else>{{item.quantity}} 颗</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 入库弹窗 -->
+  <view class="modal-overlay" wx:if="{{showStockIn}}" bindtap="onCloseStockIn">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">手动入库</text>
+        <view class="modal-close" bindtap="onCloseStockIn">✕</view>
+      </view>
+      <view class="modal-body">
+        <view wx:for="{{stockInItems}}" wx:key="index" class="form-row">
+          <input class="form-input form-code" placeholder="色号如A01" value="{{item.colorCode}}"
+            data-index="{{index}}" data-field="colorCode" bindinput="onStockInInput" />
+          <input class="form-input form-qty" type="number" placeholder="数量" value="{{item.quantity}}"
+            data-index="{{index}}" data-field="quantity" bindinput="onStockInInput" />
+          <view class="del-btn" wx:if="{{stockInItems.length > 1}}" data-index="{{index}}" bindtap="onRemoveStockInItem">✕</view>
+        </view>
+        <view class="add-row" bindtap="onAddStockInItem"><text class="add-text">+ 添加一条</text></view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-cancel" bindtap="onCloseStockIn">取消</button>
+        <button class="modal-btn modal-confirm" bindtap="onSubmitStockIn">确认入库</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 出库弹窗 -->
+  <view class="modal-overlay" wx:if="{{showStockOut}}" bindtap="onCloseStockOut">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">手动出库</text>
+        <view class="modal-close" bindtap="onCloseStockOut">✕</view>
+      </view>
+      <view class="modal-body">
+        <view wx:for="{{stockOutItems}}" wx:key="index" class="form-row">
+          <input class="form-input form-code" placeholder="色号如A01" value="{{item.colorCode}}"
+            data-index="{{index}}" data-field="colorCode" bindinput="onStockOutInput" />
+          <input class="form-input form-qty" type="number" placeholder="数量" value="{{item.quantity}}"
+            data-index="{{index}}" data-field="quantity" bindinput="onStockOutInput" />
+          <view class="del-btn" wx:if="{{stockOutItems.length > 1}}" data-index="{{index}}" bindtap="onRemoveStockOutItem">✕</view>
+        </view>
+        <view class="add-row" bindtap="onAddStockOutItem"><text class="add-text">+ 添加一条</text></view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-cancel" bindtap="onCloseStockOut">取消</button>
+        <button class="modal-btn modal-confirm modal-confirm-danger" bindtap="onSubmitStockOut">确认出库</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计范围弹窗 -->
+  <view class="modal-overlay" wx:if="{{showStatConfig}}" bindtap="onCloseStatConfig">
+    <view class="modal-content modal-content-lg" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">库存统计范围</text>
+        <view class="modal-close" bindtap="onCloseStatConfig">✕</view>
+      </view>
+      <view class="modal-body">
+        <!-- 我的图纸 -->
+        <view wx:if="{{statConversions.length > 0}}" class="stat-section">
+          <text class="stat-section-title">我的图纸</text>
+          <view wx:for="{{statConversions}}" wx:key="id" class="stat-config-item"
+            data-index="{{index}}" bindtap="onToggleStatConversion">
+            <view class="stat-checkbox {{item.isStat ? 'checked' : ''}}">
+              <text wx:if="{{item.isStat}}">✓</text>
+            </view>
+            <view class="stat-item-info">
+              <text class="stat-item-name">{{item.name || '未命名图纸'}}</text>
+              <text class="stat-item-size">{{item.width}}x{{item.height}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{statConversions.length === 0}}" class="empty-state small">
+          <text class="empty-text">暂无可选图纸</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-cancel" bindtap="onCloseStatConfig">取消</button>
+        <button class="modal-btn modal-confirm" bindtap="onSaveStatConfig">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

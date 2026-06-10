@@ -1,0 +1,67 @@
+<view class="bead-profile">
+  <!-- 头部 -->
+  <view class="header-section">
+    <view class="user-info">
+      <view class="avatar">
+        <text class="avatar-text">{{avatarAnimal}}</text>
+      </view>
+      <view class="user-detail">
+        <text class="nickname">{{nickname}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="header-wave"></view>
+
+  <!-- 功能入口 -->
+  <view class="menu-group">
+    <view class="menu-card">
+      <view
+        wx:for="{{menuList}}"
+        wx:key="key"
+        class="menu-item"
+        data-key="{{item.key}}"
+        bindtap="onMenuTap"
+        hover-class="menu-item-active"
+      >
+        <view class="menu-left">
+          <text class="menu-icon">{{item.icon}}</text>
+          <view class="menu-text-wrap">
+            <text class="menu-title">{{item.name}}</text>
+            <text class="menu-desc">{{item.desc}}</text>
+          </view>
+        </view>
+        <view class="menu-right">
+          <view class="alert-dot" wx:if="{{item.hasAlert}}"></view>
+          <text class="arrow-icon">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 切换模块 -->
+  <view class="switch-section">
+    <view class="menu-card">
+      <view class="menu-item" hover-class="menu-item-active" bindtap="onSwitchModule">
+        <view class="menu-left">
+          <text class="menu-icon">🔄</text>
+          <view class="menu-text-wrap">
+            <text class="menu-title">切换模块</text>
+            <text class="menu-desc">切换到记账助手</text>
+          </view>
+        </view>
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section">
+    <button class="logout-btn" hover-class="logout-btn-active" bindtap="onLogout">退出登录</button>
+  </view>
+
+  <!-- 底部 -->
+  <view class="footer">
+    <text class="footer-text">拼豆助手 v1.0.0</text>
+  </view>
+</view>

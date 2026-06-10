@@ -1,0 +1,30 @@
+<view class="portal-page">
+  <view class="header">
+    <text class="title">选择功能模块</text>
+    <text class="subtitle">请选择要使用的功能</text>
+  </view>
+
+  <view class="module-list">
+    <view
+      wx:for="{{modules}}"
+      wx:key="key"
+      class="module-card"
+      data-key="{{item.key}}"
+      bindtap="onSelectModule"
+      hover-class="module-card-active"
+    >
+      <view class="module-icon-wrap" style="background: {{item.color}}20;">
+        <text class="module-icon">{{item.icon}}</text>
+      </view>
+      <view class="module-info">
+        <text class="module-name">{{item.name}}</text>
+        <text class="module-desc">{{item.desc}}</text>
+      </view>
+      <text class="module-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="footer-text">可在「我的」页面切换模块</text>
+  </view>
+</view>

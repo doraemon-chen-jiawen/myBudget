@@ -1,0 +1,42 @@
+<!--我的收藏页面-->
+<view class="favorites-page">
+  <!-- 收藏列表 -->
+  <view class="favorites-list" wx:if="{{favorites.length > 0}}">
+    <view
+      class="favorite-item"
+      wx:for="{{favorites}}"
+      wx:key="id"
+      bindtap="goDetail"
+      data-id="{{item.drawing_id}}"
+    >
+      <image class="drawing-thumb" src="{{item.thumbnail}}" mode="aspectFill" />
+      <view class="drawing-info">
+        <text class="drawing-name">{{item.name}}</text>
+        <view class="drawing-meta">
+          <text class="size">{{item.width}}×{{item.height}}</text>
+          <text class="tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+        </view>
+      </view>
+      <view class="action-btn" catchtap="removeFavorite" data-id="{{item.drawing_id}}">
+        <text>取消收藏</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{favorites.length === 0 && !loading}}">
+    <text class="empty-icon">❤️</text>
+    <text class="empty-text">暂无收藏图纸</text>
+    <button class="go-browse-btn" bindtap="goBrowse">去逛逛</button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{!hasMore && favorites.length > 0}}">
+    <text>没有更多了</text>
+  </view>
+</view>

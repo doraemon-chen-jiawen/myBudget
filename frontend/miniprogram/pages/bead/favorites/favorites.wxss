@@ -1,0 +1,139 @@
+/* 我的收藏页面样式 */
+.favorites-page {
+  min-height: 100vh;
+  background: #FAF7F2;
+  padding-bottom: 20rpx;
+}
+
+/* 收藏列表 */
+.favorites-list {
+  padding: 24rpx 32rpx;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(242, 153, 74, 0.06);
+  transition: transform 0.15s;
+}
+
+.favorite-item:active {
+  transform: scale(0.98);
+}
+
+.drawing-thumb {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 16rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+  background: #FAF7F2;
+}
+
+.drawing-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.drawing-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2A26;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawing-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.size {
+  font-size: 24rpx;
+  color: #8C857C;
+  padding: 4rpx 14rpx;
+  background: #FAF7F2;
+  border-radius: 8rpx;
+}
+
+.tag {
+  font-size: 24rpx;
+  color: #F2994A;
+  padding: 4rpx 14rpx;
+  background: rgba(242, 153, 74, 0.08);
+  border-radius: 8rpx;
+}
+
+.action-btn {
+  padding: 12rpx 20rpx;
+  border-radius: 12rpx;
+  background: #FAF7F2;
+  font-size: 24rpx;
+  color: #8C857C;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.action-btn:active {
+  background: #F5F0E8;
+  color: #FF6B6B;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #B8B0A4;
+  margin-bottom: 40rpx;
+}
+
+.go-browse-btn {
+  width: 220rpx;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #F2994A;
+  color: #fff;
+  border-radius: 100rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 16rpx rgba(242, 153, 74, 0.3);
+}
+
+.go-browse-btn::after {
+  border: none;
+}
+
+/* 加载状态 */
+.loading-more, .no-more {
+  text-align: center;
+  padding: 32rpx;
+  font-size: 24rpx;
+  color: #CCC4B8;
+}

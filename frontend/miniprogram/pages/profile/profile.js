@@ -24,6 +24,9 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().initTabs();
+    }
     this.loadUserInfo();
   },
 
@@ -175,6 +178,12 @@ Page({
   onNavigateToIncome() {
     wx.navigateTo({
       url: "/pages/income/income"
+    });
+  },
+
+  onSwitchModule() {
+    wx.reLaunch({
+      url: "/pages/portal/portal"
     });
   }
 });
